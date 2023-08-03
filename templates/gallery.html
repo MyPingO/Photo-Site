@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from 'macros.html' import photo_gallery %}
+
+{% block content %}
+
+{% if photos %}
+    {{ photo_gallery(photos) }}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% macro photo_gallery(photos) %}
+    <div class="galleryContainer mt-2">
+        <div class="row">
+            {% for photo in photos %}
+            <div class="col-md-4 w-33 h-33">
+                <div class="card mb-4">
+                    <img src="{{ url_for('static', filename='images/' + photo.filename) }}" class="card-img-top" alt="{{ photo.filename }}">
+                    <div class="card-body">
+                        <a href="{{ url_for('purchase', photo_id=photo.id) }}" class="btn btn-primary">Buy Now</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endmacro %}
