@@ -1,25 +1,10 @@
 {% extends "base.html" %}
+{% from 'macros.html' import photo_gallery with context%}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        {% for photo in photos %}
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <img src="{{ url_for('static', filename='images/' + photo.filename) }}" class="card-img-top"
-                    alt="{{ photo.filename }}">
-                <div class="card-body">
-                    {% set purchase = current_user.purchases.filter_by(photo_id=photo.id).first() %}
-                    {% if purchase %}
-                    <p>Purchased at {{ purchase.date }}</p>
-                    {% endif %}
-                    <a href="{{ url_for('download', photo_id=photo.id) }}" class="btn btn-primary">Download</a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
 
-    </div>
-</div>
+{% if photos %}
+    {{ photo_gallery(photos, purchases=True) }}
+{% endif %}
 
 {% endblock %}

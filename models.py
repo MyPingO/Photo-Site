@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy, Model
 from flask_login import LoginManager, UserMixin
+from datetime import datetime
 
 from __init__ import db
 
@@ -30,10 +31,13 @@ class Purchase(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     photo_id = db.Column(db.Integer, db.ForeignKey('photo.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    date = db.Column(db.DateTime)
+    date = db.Column(db.DateTime, default=datetime.now())
 
     user = db.relationship('User', back_populates='purchases', lazy=True)
     photo = db.relationship('Photo', back_populates='purchases', lazy=True)
 
     def __repr__(self):
         return f'<Purchase {self.id}>'
+    def date_pretty(self):
+        return self.date.strftime('%b %d, %Y %I:%M %p')
+

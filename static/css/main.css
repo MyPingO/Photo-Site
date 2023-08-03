@@ -1,3 +1,16 @@
 .galleryContainer {
     margin: 1%;
 }
+.zoom-img-container {
+    transition: transform .2s; /* Animation */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-img {
+    max-width: 100%;
+    max-height: 100%;
+}

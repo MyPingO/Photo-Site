@@ -24,16 +24,17 @@ def upload():
 
     form = PhotoUploadForm()
     if form.validate_on_submit():
-        photo = form.photo.data
-        filename = secure_filename(photo.filename)
-        filename, extension = os.path.splitext(filename)  # Split the filename and extension
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        unique_filename = f"{filename}_{timestamp}{extension}" # Add timestamp to filename to make it unique
-        filepath = f"{app.config['UPLOAD_FOLDER']}/{unique_filename}"
-        photo.save(filepath)
+        photos = form.photos.data
+        for photo in photos:
+            filename = secure_filename(photo.filename)
+            filename, extension = os.path.splitext(filename)  # Split the filename and extension
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            unique_filename = f"{filename}_{timestamp}{extension}" # Add timestamp to filename to make it unique
+            filepath = f"{app.config['UPLOAD_FOLDER']}/{unique_filename}"
+            photo.save(filepath)
+            new_photo = Photo(filename=unique_filename, user_id=current_user.id)
+            db.session.add(new_photo)
         
-        new_photo = Photo(filename=unique_filename, user_id=current_user.id)
-        db.session.add(new_photo)
         db.session.commit()
 
         flash('File successfully uploaded')
@@ -101,10 +102,10 @@ def download(photo_id):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.data.username).first()
+        user = User.query.filter_by(username=form.username.data).first()
 
-        if user and check_password_hash(user.password, form.data.password):
-            login_user(user, form.data.remember)
+        if user and check_password_hash(user.password, form.password.data):
+            login_user(user, form.remember.data)
             return redirect(url_for('gallery'))
         else:
             flash('Invalid username or password')

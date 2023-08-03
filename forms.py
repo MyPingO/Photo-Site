@@ -1,13 +1,13 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed, FileRequired, DataRequired
-from wtforms import SubmitField, StringField, PasswordField, BooleanField
+from flask_wtf.file import FileRequired, FileAllowed, DataRequired
+from wtforms import SubmitField, StringField, PasswordField, BooleanField, MultipleFileField
 from flask_uploads import UploadSet, IMAGES
 from wtforms.validators import Length, EqualTo, Email
 
 images = UploadSet('images', IMAGES)
 
 class PhotoUploadForm(FlaskForm):
-    photo = FileField('Photo', validators=[FileRequired(), FileAllowed(images)])
+    photos = MultipleFileField('Upload Photo(s)', validators=[FileAllowed(images)])
     submit = SubmitField('Submit')
 
 class PurchaseSearchForm(FlaskForm):

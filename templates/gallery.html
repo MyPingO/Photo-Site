@@ -1,10 +1,79 @@
 {% extends "base.html" %}
-{% from 'macros.html' import photo_gallery %}
+{% from 'macros.html' import photo_gallery with context%}
 
 {% block content %}
 
 {% if photos %}
-    {{ photo_gallery(photos) }}
+{{ photo_gallery(photos) }}
 {% endif %}
+
+<!-- <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('.zoom-img-container').forEach(container => {
+            let img = container.querySelector('.modal-img');
+            let zoomLevel = 1;
+            let panX = 0;
+            let panY = 0;
+            let dragging = false;
+
+            // Function to update the transform
+            const updateTransform = () => {
+                img.style.transform = `scale(${zoomLevel}) translate(${panX}px, ${panY}px)`;
+            };
+
+            img.addEventListener('dragstart', function (event) {
+                event.preventDefault();
+            });
+
+            // Mouse wheel to zoom in and out
+            container.addEventListener('wheel', function (event) {
+                event.preventDefault();
+                if (event.deltaY < 0) {
+                    zoomLevel += 0.1;
+                } else {
+                    zoomLevel -= 0.1;
+                    if (zoomLevel < 1) zoomLevel = 1;
+                }
+                updateTransform();
+            });
+
+            // Mouse down to start dragging
+            container.addEventListener('mousedown', function () {
+                dragging = true;
+            });
+
+            // Mouse move to drag
+            container.addEventListener('mousemove', function (event) {
+                if (dragging) {
+                    let tempX = panX + event.movementX;
+                    let tempY = panY + event.movementY;
+
+                    // Add constraints here to restrict panning
+                    let maxX = container.offsetWidth - img.offsetWidth * zoomLevel;
+                    let maxY = container.offsetHeight - img.offsetHeight * zoomLevel;
+
+                    // Restrict panning to the right and bottom
+                    if (tempX > 0) tempX = 0;
+                    if (tempY > 0) tempY = 0;
+
+                    // Restrict panning to the left and top
+                    if (tempX < maxX) tempX = maxX;
+                    if (tempY < maxY) tempY = maxY;
+
+                    panX = tempX;
+                    panY = tempY;
+                    updateTransform();
+                }
+            });
+
+            // Mouse up to stop dragging
+            container.addEventListener('mouseup', function () {
+                dragging = false;
+            });
+
+            // Add touch events for mobile if necessary
+        });
+    });
+</script> -->
 
 {% endblock %}
