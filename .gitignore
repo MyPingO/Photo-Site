@@ -1,4 +1,4 @@
-/static/images
+app/static/images
 
 #database file
 *.db

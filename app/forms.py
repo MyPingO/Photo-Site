@@ -7,7 +7,7 @@ from wtforms.validators import Length, EqualTo, Email
 images = UploadSet('images', IMAGES)
 
 class PhotoUploadForm(FlaskForm):
-    photos = MultipleFileField('Upload Photo(s)', validators=[FileAllowed(images)])
+    photos = MultipleFileField('Upload Photo(s)', validators=[FileAllowed(images), DataRequired()])
     submit = SubmitField('Submit')
 
 class PurchaseSearchForm(FlaskForm):
@@ -27,3 +27,9 @@ class SignupForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Sign Up')
+
+class EditPhotoForm(FlaskForm):
+    description = StringField('Description')
+    category = StringField('Category')
+    price = StringField('Price')
+    submit = SubmitField('Submit')

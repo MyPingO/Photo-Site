@@ -1,0 +1,104 @@
+body {
+    font-size: 1.5rem !important;
+    background-color: #F8F9FA;
+}
+
+button {
+    font-size: 1.5rem !important;
+}
+
+a {
+    font-size: 1.5rem !important;
+}
+
+.alert {
+    margin-top: 10px !important;
+    margin-left: 15% !important;
+    margin-right: 15% !important;
+}
+
+.galleryContainer {
+    margin: 1%;
+}
+
+.card-img-container {
+    position: relative;
+    height: 0;
+    padding-bottom: 56.25%;
+    /* 16:9 Aspect Ratio */
+    overflow: hidden;
+}
+
+.card-img-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+}
+
+.btn-success {
+    background-color: #fd7e14 !important;
+    border: none !important;
+}
+
+.btn-secondary {
+    background-color: #007bff !important;
+    border: none !important;
+}
+
+.btn-danger {
+    background-color: #28a745 !important;
+    border: none !important;
+}
+
+.modal-dialog {
+    max-width: 80vw !important;
+    /* Limit the width of the modal */
+    max-height: 90vh !important;
+    /* Limit the height of the modal */
+    justify-content: center !important;
+}
+
+.modal-content {
+    width: auto;
+    /* Let content define the width */
+    max-height: 100%;
+    /* Don't allow content to overflow modal */
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.5), 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+.modal-body {
+    display: flex;
+    /* Allow the body to be a flex container */
+    justify-content: center;
+    /* Center content horizontally */
+    align-items: center;
+    /* Center content vertically */
+    padding: 0 !important;
+    /* Remove padding */
+}
+
+.modal-img {
+    max-width: 80vw !important;
+    /* Limit the width of the image */
+    max-height: 90vh !important;
+    /* Limit the height of the image */
+    width: auto;
+    /* Let the image content define the width */
+    height: auto;
+    /* Let the image content define the height */
+    padding: 10px;
+    /* Add padding */
+    background: white;
+    /* Ensure that the padding area is white */
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        max-width: var(--bs-modal-width);
+        margin-right: auto;
+        margin-left: auto;
+    }
+}

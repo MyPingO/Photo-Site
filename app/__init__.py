@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_migrate import Migrate
-import os
+import os, stripe
 
 database_name = 'PingPhotos.db'
 app = Flask(__name__)
@@ -14,6 +14,8 @@ app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'images')
 images = UploadSet('images', IMAGES)
 app.config['UPLOADED_IMAGES_DEST'] = app.config['UPLOAD_FOLDER']
 configure_uploads(app, images)
+
+stripe.api_key = os.environ.get('StripeAPI')
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -28,13 +30,13 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
-from models import User
+from .models import User
 
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
-from routes import *
+from .routes import *
 
 with app.app_context():
     db.create_all()

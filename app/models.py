@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy, Model
 from flask_login import LoginManager, UserMixin
 from datetime import datetime
 
-from __init__ import db
+from app import db
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -18,10 +18,11 @@ class User(UserMixin, db.Model):
 
 class Photo(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(80))
+    description = db.Column(db.String(80))
     filename = db.Column(db.String(80), unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    price = db.Column(db.Float, default=0.0)
-    is_purchased = db.Column(db.Boolean, default=False)
+    price = db.Column(db.Float, default=1.99)
     purchases = db.relationship('Purchase', back_populates='photo', lazy='dynamic')
 
     def __repr__(self):

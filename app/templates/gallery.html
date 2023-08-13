@@ -4,9 +4,35 @@
 {% block content %}
 
 {% if photos %}
-{{ photo_gallery(photos) }}
+    {{ photo_gallery(photos) }}
 {% endif %}
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('buy-photo-btn')) {
+                const photoId = e.target.getAttribute('data-id');
+                if (photoId) {
+                    purchasePhoto(photoId);
+                }
+            }
+        });
+    });
+
+    function purchasePhoto(photoId) {
+        fetch('/create_payment/' + photoId)
+            .then(response => response.json())
+            .then(data => {
+                stripe.redirectToCheckout({
+                    sessionId: data.session_id
+                }).then(function (result) {
+                    if (result.error) {
+                        console.error(result.error.message);
+                    }
+                });
+            });
+    }
+</script>
 <!-- <script>
     window.addEventListener('DOMContentLoaded', (event) => {
         document.querySelectorAll('.zoom-img-container').forEach(container => {

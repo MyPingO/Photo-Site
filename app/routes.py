@@ -1,12 +1,12 @@
 from datetime import datetime
-from flask import render_template, flash, send_from_directory, url_for, redirect, request, abort
-from flask_login import login_required, current_user, login_user, logout_user
+from flask import jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
+from flask_login import login_required, current_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from models import Photo, User, Purchase
-from forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm
-from __init__ import app, db, images
-import re, os
+from .models import Photo, User, Purchase
+from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, EditPhotoForm
+from app import app, db
+import re, os, stripe
 
 # two decorators, same function
 @app.route('/')
@@ -18,9 +18,9 @@ def gallery():
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
-    # Check if the user is admin
     if not current_user.is_admin:
-        abort(403, "You do not have permission to view this page!")  # Return HTTP 403 if user is not admin
+        flash('You do not have permission to view this page!')
+        return redirect(url_for('gallery'))
 
     form = PhotoUploadForm()
     if form.validate_on_submit():
@@ -42,10 +42,50 @@ def upload():
 
     return render_template('upload.html', form=form)
 
+@app.route('/edit_photo/<int:photo_id>', methods=['GET', 'POST'])
+@login_required
+def edit_photo(photo_id):
+    if not current_user.is_admin:
+        flash('You do not have permission to view this page!')
+        return redirect(url_for('gallery'))
+    
+    photo = Photo.query.get(photo_id)
+    if not photo:
+        flash('Photo not found')
+        return redirect(url_for('gallery'))
+    
+    form = EditPhotoForm()
+    if form.validate_on_submit():
+        photo.description = form.description.data if form.description.data else photo.description
+        photo.category = form.category.data if form.category.data else photo.category
+        photo.price = form.price.data if form.price.data else photo.price
+        db.session.commit()
+        flash('Photo updated')
+        return redirect(url_for('gallery'))
+    else:
+        return render_template('edit_photo.html', form=form, photo=photo)
+
+    
+@app.route('/delete_photo/<int:photo_id>', methods=['POST'])
+@login_required
+def delete_photo(photo_id):
+    if not current_user.is_admin:
+        flash('You do not have permission to view this page!')
+        return redirect(url_for('gallery'))
+    
+    photo = Photo.query.get(photo_id)
+    if not photo:
+        flash('Photo not found')
+        return redirect(url_for('gallery'))
+    else:
+        db.session.delete(photo)
+        db.session.commit()
+        flash('Photo deleted')
+        return redirect(url_for('gallery'))
+
 @app.route('/admin/search_purchases', methods=['GET', 'POST'])
 @login_required
 def search_purchases():
-    # Check if the user is admin
     if not current_user.is_admin:
         abort(403, "You do not have permission to view this page!")  # Return HTTP 403 if user is not admin
 
@@ -64,16 +104,52 @@ def purchase(photo_id):
     # Check if photo exists
     photo = Photo.query.get(photo_id)
     if not photo:
-        return "Photo not found", 404
+        flash('Photo not found')
+        return redirect(url_for('gallery'))
+    if Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first():
+        flash('Photo already purchased')
+        return redirect(url_for('gallery'))
 
-    # Create a new purchase instance
     new_purchase = Purchase(user_id=current_user.id, photo_id=photo.id)
 
-    # Add the new purchase to the database
     db.session.add(new_purchase)
     db.session.commit()
 
-    return "Purchase successful", 200
+    flash('Photo purchased successfully, you can now download it from the My Photos page')
+    return redirect(url_for('gallery'))
+
+@app.route('/create_payment/<int:photo_id>')
+@login_required
+def create_payment(photo_id):
+    # Check if photo is already purchased
+    purchase = Purchase.query.filter_by(user_id=current_user.id, photo_id=photo_id).first()
+    if purchase:
+        flash('You have already purchased this photo')
+        return redirect(url_for('gallery'))
+
+    photo = Photo.query.get(photo_id)
+    if not photo:
+        return "Photo not found", 404
+    
+    # Create a Stripe session for payment
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': 'Photo',
+                },
+                'unit_amount': int(photo.price * 100),
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=url_for('purchase', photo_id=photo_id, _external=True, _scheme='http', _host='localhost:5000'),
+        cancel_url=url_for('gallery', _external=True, _scheme='http', _host='localhost:5000')
+    )
+
+    return jsonify(session_id=session.id)
 
 @login_required
 @app.route('/my_photos')
@@ -93,7 +169,8 @@ def download(photo_id):
     # Check if user has purchased photo
     purchase = Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first()
     if not purchase:
-        return "You have not purchased this photo", 403
+        flash('You have not purchased this photo')
+        return redirect(url_for('gallery'))
 
     # Download the photo
     return send_from_directory(app.config['UPLOAD_FOLDER'], photo.filename, as_attachment=True)
