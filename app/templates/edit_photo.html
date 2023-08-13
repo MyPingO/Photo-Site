@@ -29,7 +29,7 @@
     <div class="row justify-content-center"> <!-- Center the column -->
         <div class="col-lg-6 col-sm-12">
             <div class="card text-center"> <!-- Center content inside the card -->
-                <img src="{{ url_for('static', filename='images/' + photo.filename) }}" alt="{{ photo.filename }}">
+                <img src="{{ url_for('static', filename='images/thumbnails/' + photo.filename) }}" alt="{{ photo.filename }}">
                 <div class="card-body">
                     <!-- Edit and Delete photo buttons for admin -->
                     {% if current_user.is_admin %}

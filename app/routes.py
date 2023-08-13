@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 from flask import jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
 from flask_login import login_required, current_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -6,6 +7,8 @@ from werkzeug.utils import secure_filename
 from .models import Photo, User, Purchase
 from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, EditPhotoForm
 from app import app, db
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+from math import sqrt
 import re, os, stripe
 
 # two decorators, same function
@@ -22,6 +25,8 @@ def upload():
         flash('You do not have permission to view this page!')
         return redirect(url_for('gallery'))
 
+    watermark_text = "Ping's Photos"
+
     form = PhotoUploadForm()
     if form.validate_on_submit():
         photos = form.photos.data
@@ -30,17 +35,71 @@ def upload():
             filename, extension = os.path.splitext(filename)  # Split the filename and extension
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
             unique_filename = f"{filename}_{timestamp}{extension}" # Add timestamp to filename to make it unique
-            filepath = f"{app.config['UPLOAD_FOLDER']}/{unique_filename}"
-            photo.save(filepath)
-            new_photo = Photo(filename=unique_filename, user_id=current_user.id)
-            db.session.add(new_photo)
-        
+
+            # Directories
+            thumbnail_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnails')
+            preview_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'previews')
+            original_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'originals')
+
+            # Save the original image without watermark
+            original_path = f"{original_dir}/{unique_filename}"
+            photo.save(original_path)
+
+            # Open the original image with Pillow
+            with Image.open(original_path) as img:
+                img_rgba = img.convert('RGBA')  # Convert the image to RGBA
+                img = ImageOps.exif_transpose(img)  # Rotate the image based on EXIF data
+                
+                # Create a blank RGBA image with the same size as the original image
+                watermark = Image.new('RGBA', img.size, (255, 255, 255, 0))
+                draw = ImageDraw.Draw(watermark)
+                font = ImageFont.truetype("verdana.ttf", img.width // 40 if img.width > img.height else img.height // 40)
+                
+                # Add watermark in 4 corners
+                pos1 = (img.width // 20, img.height // 20)
+                pos2 = (img.width - img.width // 20, img.height // 20)
+                pos3 = (img.width // 20, img.height - img.height // 20)
+                pos4 = (img.width - img.width // 20, img.height - img.height // 20)
+
+                opacity = 128
+
+                # Draw them
+                draw.text(pos1, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="la")
+                draw.text(pos2, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="ra")
+                draw.text(pos3, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="lb")
+                draw.text(pos4, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="rb")
+                
+                # Merge the watermark with the original image
+                img = Image.alpha_composite(img_rgba, watermark)
+
+                # Convert the image back to RGB
+                watermarked_img = img.convert('RGB')
+
+                # Save the full-size image with watermark
+                preview_path = f"{preview_dir}/{unique_filename}"
+                watermarked_img.save(preview_path)
+
+                # Resize and save the thumbnail image with watermark
+                img_resized = watermarked_img.resize((watermarked_img.width // 4, watermarked_img.height // 4), Image.LANCZOS)
+                thumbnail_path = f"{thumbnail_dir}/{unique_filename}"
+                img_resized.save(thumbnail_path)
+
+                # Add to database
+                new_photo = Photo(
+                    filename=unique_filename,
+                    user_id=current_user.id,
+                )
+                db.session.add(new_photo)
+
         db.session.commit()
 
         flash('File successfully uploaded')
         return redirect(url_for('gallery'))
 
     return render_template('upload.html', form=form)
+
+def distance(p1, p2):
+    return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
 @app.route('/edit_photo/<int:photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -80,6 +139,10 @@ def delete_photo(photo_id):
     else:
         db.session.delete(photo)
         db.session.commit()
+        # delete file
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnails', photo.filename))
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'previews', photo.filename))
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'originals', photo.filename))
         flash('Photo deleted')
         return redirect(url_for('gallery'))
 
@@ -87,7 +150,8 @@ def delete_photo(photo_id):
 @login_required
 def search_purchases():
     if not current_user.is_admin:
-        abort(403, "You do not have permission to view this page!")  # Return HTTP 403 if user is not admin
+        flash('You do not have permission to view this page!')
+        return redirect(url_for('gallery'))
 
     form = PurchaseSearchForm()
     purchases = []
@@ -129,7 +193,8 @@ def create_payment(photo_id):
 
     photo = Photo.query.get(photo_id)
     if not photo:
-        return "Photo not found", 404
+        flash('Photo not found')
+        return redirect(url_for('gallery'))
     
     # Create a Stripe session for payment
     session = stripe.checkout.Session.create(
@@ -164,16 +229,17 @@ def download(photo_id):
     # Check if photo exists
     photo = Photo.query.get(photo_id)
     if not photo:
-        return "Photo not found", 404
+        flash('Photo not found')
+        return redirect(url_for('gallery'))
 
     # Check if user has purchased photo
     purchase = Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first()
-    if not purchase:
+    if not purchase and not current_user.is_admin:
         flash('You have not purchased this photo')
         return redirect(url_for('gallery'))
 
     # Download the photo
-    return send_from_directory(app.config['UPLOAD_FOLDER'], photo.filename, as_attachment=True)
+    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], 'originals'), photo.filename, as_attachment=True)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
