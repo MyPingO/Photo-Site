@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% from 'macros.html' import photo_gallery with context%}
+
+{% block content %}
+{{ photo_gallery(photos) }}
+{% endblock %}

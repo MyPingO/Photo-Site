@@ -1,9 +1,9 @@
 from datetime import datetime
-import random
 from flask import jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
 from flask_login import login_required, current_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+from sqlalchemy import func
 from .models import Photo, User, Purchase
 from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, EditPhotoForm
 from app import app, db
@@ -17,6 +17,17 @@ import re, os, stripe
 def gallery():
     photos = Photo.query.all()
     return render_template('gallery.html', title='Gallery', photos=photos)
+
+@app.route('/collections')
+def collections():
+    categories = db.session.query(Photo.category.distinct()).all()
+    categories = [category[0] for category in categories if category[0] is not None]
+    return render_template('collections.html', categories=categories)
+
+@app.route('/category/<category_name>')
+def category(category_name):
+    photos = Photo.query.filter_by(category=category_name).all()
+    return render_template('category.html', photos=photos)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -47,8 +58,8 @@ def upload():
 
             # Open the original image with Pillow
             with Image.open(original_path) as img:
-                img_rgba = img.convert('RGBA')  # Convert the image to RGBA
                 img = ImageOps.exif_transpose(img)  # Rotate the image based on EXIF data
+                img_rgba = img.convert('RGBA')  # Convert the image to RGBA
                 
                 # Create a blank RGBA image with the same size as the original image
                 watermark = Image.new('RGBA', img.size, (255, 255, 255, 0))
@@ -61,7 +72,7 @@ def upload():
                 pos3 = (img.width // 20, img.height - img.height // 20)
                 pos4 = (img.width - img.width // 20, img.height - img.height // 20)
 
-                opacity = 128
+                opacity = 192
 
                 # Draw them
                 draw.text(pos1, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="la")
@@ -86,8 +97,11 @@ def upload():
 
                 # Add to database
                 new_photo = Photo(
+                    description=f"Dimensions: {img.width}x{img.height}",
                     filename=unique_filename,
                     user_id=current_user.id,
+                    width=img.width,
+                    height=img.height,
                 )
                 db.session.add(new_photo)
 
@@ -114,8 +128,10 @@ def edit_photo(photo_id):
         return redirect(url_for('gallery'))
     
     form = EditPhotoForm()
+    image = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], 'originals', photo.filename))
+    image_width, image_height = image.size
     if form.validate_on_submit():
-        photo.description = form.description.data if form.description.data else photo.description
+        photo.description = str(form.description.data.strip() + f" (Dimensions: {image_width}x{image_height})") if form.description.data else photo.description
         photo.category = form.category.data if form.category.data else photo.category
         photo.price = form.price.data if form.price.data else photo.price
         db.session.commit()

@@ -3,6 +3,11 @@
 
 {% block content %}
 
+<div class="text-center">
+    <h1>Browse photos</h1>
+    <h4>Check out my <a href="{{ url_for('collections') }}">collections</a> for categorized photos</h4>
+</div>
+
 {% if photos %}
     {{ photo_gallery(photos) }}
 {% endif %}

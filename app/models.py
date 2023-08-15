@@ -37,6 +37,9 @@ class Purchase(UserMixin, db.Model):
     user = db.relationship('User', back_populates='purchases', lazy=True)
     photo = db.relationship('Photo', back_populates='purchases', lazy=True)
 
+    width = db.Column(db.Integer)
+    height = db.Column(db.Integer)
+
     def __repr__(self):
         return f'<Purchase {self.id}>'
     def date_pretty(self):

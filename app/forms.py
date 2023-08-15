@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired, FileAllowed, DataRequired
-from wtforms import SubmitField, StringField, PasswordField, BooleanField, MultipleFileField
+from wtforms import SubmitField, StringField, PasswordField, BooleanField, MultipleFileField, SelectField
 from flask_uploads import UploadSet, IMAGES
 from wtforms.validators import Length, EqualTo, Email
 
@@ -30,6 +30,6 @@ class SignupForm(FlaskForm):
 
 class EditPhotoForm(FlaskForm):
     description = StringField('Description')
-    category = StringField('Category')
+    category = SelectField('Category', choices=[('',''), ('Flowers & Plants', 'Flowers & Plants'), ('Birds', 'Birds'), ('Animals', 'Animals'), ('Bugs', 'Bugs'), ('Landscapes', 'Landscapes'), ('People', 'People'), ('Other', 'Other')])
     price = StringField('Price')
     submit = SubmitField('Submit')

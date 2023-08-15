@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for category in categories %}
+<div class="justify-content-center">
+    <div class="card mb-4">
+        <a href="{{ url_for('category', category_name=category) }}">
+            <h5 class="card-title">{{ category }}</h5>
+        </a>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
