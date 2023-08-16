@@ -3,13 +3,12 @@ from flask import jsonify, render_template, flash, send_from_directory, url_for,
 from flask_login import login_required, current_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from sqlalchemy import func
 from .models import Photo, User, Purchase
 from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, EditPhotoForm
-from app import app, db
+from app import app, db, login_manager
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
-from random import shuffle
+from random import shuffle, choice
 import re, os, stripe
 
 # two decorators, same function
@@ -23,14 +22,21 @@ def gallery():
 @app.route('/collections')
 def collections():
     categories = db.session.query(Photo.category.distinct()).all()
-    categories = [category[0] for category in categories if category[0] is not None]
-    return render_template('collections.html', categories=categories)
+    categories = [category[0] for category in categories]
 
-@app.route('/category/<category_name>')
-def category(category_name):
-    photos = Photo.query.filter_by(category=category_name).all()
+    # Getting a random image for each category
+    random_images = {}
+    for category in categories:
+        photos = Photo.query.filter_by(category=category).all()
+        random_images[category] = choice(photos) if photos else None
+
+    return render_template('collections.html', categories=categories, random_images=random_images)
+
+@app.route('/collection/<category>')
+def collection(category):
+    photos = Photo.query.filter_by(category=category).all()
     shuffle(photos)
-    return render_template('category.html', photos=photos)
+    return render_template('collection.html', photos=photos)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -182,8 +188,8 @@ def search_purchases():
         ).all()
     return render_template('search_purchases.html', form=form, purchases=purchases)
 
-@login_required
 @app.route('/purchase/<int:photo_id>')
+@login_required
 def purchase(photo_id):
     # Check if photo exists
     photo = Photo.query.get(photo_id)
@@ -203,8 +209,11 @@ def purchase(photo_id):
     return redirect(url_for('gallery'))
 
 @app.route('/create_payment/<int:photo_id>')
-@login_required
 def create_payment(photo_id):
+    # Check if user is authenticated
+    if not current_user.is_authenticated:
+        flash('You must be logged in to purchase a photo')
+        return jsonify({'error': 'Unauthorized'}), 401
     # Check if photo is already purchased
     purchase = Purchase.query.filter_by(user_id=current_user.id, photo_id=photo_id).first()
     if purchase:
@@ -236,15 +245,15 @@ def create_payment(photo_id):
 
     return jsonify(session_id=session.id)
 
-@login_required
 @app.route('/my_photos')
+@login_required
 def my_photos():
     purchases = Purchase.query.filter_by(user_id=current_user.id).all()
     purchased_photos = [purchase.photo for purchase in purchases]  # gather all photos related to these purchases
     return render_template('my_photos.html', title='My Photos', photos=purchased_photos)
 
-@login_required
 @app.route('/download/<int:photo_id>')
+@login_required
 def download(photo_id):
     # Check if photo exists
     photo = Photo.query.get(photo_id)
