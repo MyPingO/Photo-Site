@@ -2,14 +2,43 @@
 
 {% block content %}
 
+<div class="text-center mt-4">
+    <h1>My Collections</h1>
+    Browse images based on category
+</div>
+
 {% for category in categories %}
-<div class="justify-content-center">
-    <div class="card mb-4">
-        <a href="{{ url_for('category', category_name=category) }}">
-            <h5 class="card-title">{{ category }}</h5>
-        </a>
+<div class="d-flex justify-content-center">
+    <div class="col-lg-8 col-sm-12">
+        <div class="card m-4">
+            <div class="card-img-container">
+                {% if random_images[category] %}
+                <a href="{{ url_for('collection', category=category) }}">
+                    <img src="{{ url_for('static', filename='images/thumbnails/' + random_images[category].filename) }}"
+                        class="card-img-top" alt="{{ random_images[category].filename }}">
+                    {% endif %}
+                </a>
+            </div>
+            <div class="card-footer text-muted">
+                {{ category }}
+            </div>
+        </div>
     </div>
 </div>
 {% endfor %}
+
+<script>
+    window.onload = function () {
+        var cards = document.getElementsByClassName('card');
+        for (var i = 0; i < cards.length; i++) {
+            var red = Math.floor(Math.random() * 256);
+            var green = Math.floor(Math.random() * 256);
+            var blue = Math.floor(Math.random() * 256);
+            var opacity = .2;
+            cards[i].style.border = "3px solid rgb(" + red + ", " + green + ", " + blue + ", " + opacity + ")";
+            cards[i].style.boxShadow = "0 6px 12px 0 rgba(" + red + ", " + green + ", " + blue + ", " + opacity + "), 0 12px 26px 0 rgba(" + red + ", " + green + ", " + blue + ", " + opacity + ")";
+        }
+    };
+</script>
 
 {% endblock %}

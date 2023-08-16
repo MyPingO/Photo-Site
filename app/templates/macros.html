@@ -35,6 +35,9 @@
                     <small>
                         {% if photo.description %}
                         {{ photo.description }}
+                        {% if photo.width and photo.height %} 
+                        (Dimensions: {{ photo.width }}x{{ photo.height }})
+                        {% endif %}
                         {% endif %}
                     </small>
                     <small class="float-end">

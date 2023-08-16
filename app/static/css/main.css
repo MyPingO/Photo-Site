@@ -1,6 +1,10 @@
+.navbar {
+    background-color: #f4f4f4 !important;
+}
+
 body {
     font-size: 1.5rem !important;
-    background-color: #F8F9FA;
+    background-color: #ececec;
 }
 
 button {
@@ -100,5 +104,10 @@ a {
         max-width: var(--bs-modal-width);
         margin-right: auto;
         margin-left: auto;
+    }
+
+    .col-sm-12 {
+        flex: 0 0 auto;
+        width: 100%;
     }
 }
