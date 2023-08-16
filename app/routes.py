@@ -9,6 +9,7 @@ from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, E
 from app import app, db
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
+from random import shuffle
 import re, os, stripe
 
 # two decorators, same function
@@ -16,6 +17,7 @@ import re, os, stripe
 @app.route('/gallery')
 def gallery():
     photos = Photo.query.all()
+    shuffle(photos)
     return render_template('gallery.html', title='Gallery', photos=photos)
 
 @app.route('/collections')
@@ -27,6 +29,7 @@ def collections():
 @app.route('/category/<category_name>')
 def category(category_name):
     photos = Photo.query.filter_by(category=category_name).all()
+    shuffle(photos)
     return render_template('category.html', photos=photos)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -97,7 +100,7 @@ def upload():
 
                 # Add to database
                 new_photo = Photo(
-                    description=f"Dimensions: {img.width}x{img.height}",
+                    description=f"(Dimensions: {img.width}x{img.height})",
                     filename=unique_filename,
                     user_id=current_user.id,
                     width=img.width,
@@ -129,7 +132,8 @@ def edit_photo(photo_id):
     
     form = EditPhotoForm()
     image = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], 'originals', photo.filename))
-    image_width, image_height = image.size
+    image = ImageOps.exif_transpose(image)
+    image_width, image_height = image.width, image.height
     if form.validate_on_submit():
         photo.description = str(form.description.data.strip() + f" (Dimensions: {image_width}x{image_height})") if form.description.data else photo.description
         photo.category = form.category.data if form.category.data else photo.category

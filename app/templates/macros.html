@@ -31,7 +31,7 @@
                     {% endif %}
                 </div>
                 {% if photo.description or photo.category %}
-                <div class="card-footer text-muted"> <!-- Footer with small text -->
+                <div class="card-footer text-muted d-flex justify-content-between"> <!-- Footer with small text -->
                     <small>
                         {% if photo.description %}
                         {{ photo.description }}
@@ -39,7 +39,7 @@
                     </small>
                     <small class="float-end">
                         {% if photo.category %}
-                        Category: {{ photo.category }}
+                        {{ photo.category }}
                         {% endif %}
                     </small>
                 </div>
