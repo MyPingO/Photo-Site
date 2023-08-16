@@ -25,6 +25,9 @@ class Photo(UserMixin, db.Model):
     price = db.Column(db.Float, default=1.99)
     purchases = db.relationship('Purchase', back_populates='photo', lazy='dynamic')
 
+    width = db.Column(db.Integer)
+    height = db.Column(db.Integer)
+
     def __repr__(self):
         return f'<Photo {self.filename}>'
 
@@ -36,9 +39,6 @@ class Purchase(UserMixin, db.Model):
 
     user = db.relationship('User', back_populates='purchases', lazy=True)
     photo = db.relationship('Photo', back_populates='purchases', lazy=True)
-
-    width = db.Column(db.Integer)
-    height = db.Column(db.Integer)
 
     def __repr__(self):
         return f'<Purchase {self.id}>'
