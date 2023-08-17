@@ -5,13 +5,15 @@
         <div class="col-lg-6 col-sm-12">
             <div class="card mb-4">
                 <div class="card-img-container">
-                    <img src="{{ url_for('static', filename='images/thumbnails/' + photo.filename) }}" class="card-img-top"
-                        alt="{{ photo.filename }}">
+                    <img src="{{ url_for('static', filename='images/thumbnails/' + photo.filename) }}"
+                        class="card-img-top" alt="{{ photo.filename }}">
                 </div>
                 <div class="card-body">
                     {% set purchase = current_user.purchases.filter_by(photo_id=photo.id).first() if
                     current_user.is_authenticated %}
-                    {% if not purchase and not current_user.is_admin %}
+                    {% set collection_purchased =
+                    current_user.collection_purchases.filter_by(category=photo.category).first() is not none %}
+                    {% if (not purchase and not collection_purchased) and not current_user.is_admin %}
                     <button data-id="{{ photo.id }}" class="btn btn-success buy-photo-btn">Buy Now ${{ photo.price
                         }}</button>
                     {% else %}
@@ -35,7 +37,7 @@
                     <small>
                         {% if photo.description %}
                         {{ photo.description }}
-                        {% if photo.width and photo.height %} 
+                        {% if photo.width and photo.height %}
                         (Dimensions: {{ photo.width }}x{{ photo.height }})
                         {% endif %}
                         {% endif %}
@@ -58,8 +60,8 @@
             <div class="modal-content">
                 <div class="modal-body text-center">
                     <div class="zoom-img-container">
-                        <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}" class="modal-img"
-                            alt="{{ photo.filename }}">
+                        <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}"
+                            class="modal-img" alt="{{ photo.filename }}">
                     </div>
                 </div>
             </div>
@@ -67,7 +69,7 @@
     </div>
     {% endfor %}
 </div>
-
+<!-- TODO: Check if photos have been purchased in collection -->
 <script>
     window.onload = function () {
         var cards = document.getElementsByClassName('card');

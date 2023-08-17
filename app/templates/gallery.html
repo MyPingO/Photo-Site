@@ -25,13 +25,18 @@
     });
 
     function purchasePhoto(photoId) {
-        fetch('/create_payment/' + photoId)
+        fetch('/create_payment/photo/' + photoId)
             .then(response => response.json())
             .then(data => {
                 if (data.error === 'Unauthorized') {
                     // Redirect the user to the login page
                     window.location.href = '/login';
-                } else {
+                }
+                else if (data.error === "Already Purchased" || data.error === "Not Found") {
+                    // Redirect the user to the login page
+                    window.location.href = '/gallery';
+                }
+                else {
                     stripe.redirectToCheckout({
                         sessionId: data.session_id
                     }).then(function (result) {

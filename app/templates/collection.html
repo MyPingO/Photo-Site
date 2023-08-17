@@ -2,6 +2,48 @@
 
 {% from 'macros.html' import photo_gallery with context%}
 
+
 {% block content %}
+<div class="text-center m-4">
+    <h1>{{category}} Collection</h1>
+    {% if not collection_purchased %}
+    <a href="javascript:void(0);" id="buy-collection-link">Buy</a> this collection to get access to all current and
+    future photos in this collection.
+    {% else %}
+    <p>You have already purchased this collection, Thank you!</p>
+    {% endif %}
+</div>
+
 {{ photo_gallery(photos) }}
+
+<script>
+    document.getElementById('buy-collection-link').addEventListener('click', function () {
+        purchaseCollection('{{ category }}');
+    });
+
+    function purchaseCollection(collectionCategory) {
+        fetch('/create_payment/collection/' + collectionCategory)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error === 'Unauthorized') {
+                    // Redirect the user to the login page
+                    window.location.href = '/login';
+                }
+                else if (data.error === "Already Purchased" || data.error === "Not Found") {
+                    // Redirect the user to the login page
+                    window.location.href = '/collections';
+                }
+                else {
+                    stripe.redirectToCheckout({
+                        sessionId: data.session_id
+                    }).then(function (result) {
+                        if (result.error) {
+                            console.error(result.error.message);
+                        }
+                    });
+                }
+            });
+    }
+
+</script>
 {% endblock %}

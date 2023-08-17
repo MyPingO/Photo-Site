@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(120))
     photos = db.relationship('Photo', backref='owner', lazy='dynamic')
     purchases = db.relationship('Purchase', back_populates='user', lazy='dynamic')
+    collection_purchases = db.relationship('CollectionPurchase', back_populates='user', lazy='dynamic')
     is_admin = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
@@ -30,6 +31,17 @@ class Photo(UserMixin, db.Model):
 
     def __repr__(self):
         return f'<Photo {self.filename}>'
+    
+class CollectionPurchase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    category = db.Column(db.String(80))
+    date = db.Column(db.DateTime, default=datetime.now())
+
+    user = db.relationship('User', back_populates='collection_purchases', lazy=True)
+
+    def __repr__(self):
+        return f'<CollectionPurchase {self.id}>'
 
 class Purchase(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

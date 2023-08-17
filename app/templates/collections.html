@@ -10,17 +10,22 @@
 {% for category in categories %}
 <div class="d-flex justify-content-center">
     <div class="col-lg-8 col-sm-12">
-        <div class="card m-4">
+        <div class="card collections-card m-4">
             <div class="card-img-container">
                 {% if random_images[category] %}
                 <a href="{{ url_for('collection', category=category) }}">
                     <img src="{{ url_for('static', filename='images/thumbnails/' + random_images[category].filename) }}"
-                        class="card-img-top" alt="{{ random_images[category].filename }}">
+                        class="card-img-top collections" alt="{{ random_images[category].filename }}">
                     {% endif %}
                 </a>
             </div>
-            <div class="card-footer text-muted">
-                {{ category }}
+            <div class="card-footer collections">
+                <button class="btn btn-success buy-collection-btn float-start" data-id="{{ category }}">
+                    Buy Collection ${{ collection_price}}
+                </button>
+                <div class="collection-category float-end">
+                    {{ category }}
+                </div>
             </div>
         </div>
     </div>
@@ -28,17 +33,39 @@
 {% endfor %}
 
 <script>
-    window.onload = function () {
-        var cards = document.getElementsByClassName('card');
-        for (var i = 0; i < cards.length; i++) {
-            var red = Math.floor(Math.random() * 256);
-            var green = Math.floor(Math.random() * 256);
-            var blue = Math.floor(Math.random() * 256);
-            var opacity = .2;
-            cards[i].style.border = "3px solid rgb(" + red + ", " + green + ", " + blue + ", " + opacity + ")";
-            cards[i].style.boxShadow = "0 6px 12px 0 rgba(" + red + ", " + green + ", " + blue + ", " + opacity + "), 0 12px 26px 0 rgba(" + red + ", " + green + ", " + blue + ", " + opacity + ")";
-        }
-    };
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('buy-collection-btn')) {
+                const collectionCategory = e.target.getAttribute('data-id');
+                if (collectionCategory) {
+                    purchaseCollection(collectionCategory);
+                }
+            }
+        });
+    });
+    function purchaseCollection(collectionCategory) {
+        fetch('/create_payment/collection/' + collectionCategory)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error === 'Unauthorized') {
+                    // Redirect the user to the login page
+                    window.location.href = '/login';
+                }
+                else if (data.error === "Already Purchased" || data.error === "Not Found") {
+                    // Redirect the user to the login page
+                    window.location.href = '/collections';
+                }
+                else {
+                    stripe.redirectToCheckout({
+                        sessionId: data.session_id
+                    }).then(function (result) {
+                        if (result.error) {
+                            console.error(result.error.message);
+                        }
+                    });
+                }
+            });
+    }
 </script>
 
 {% endblock %}

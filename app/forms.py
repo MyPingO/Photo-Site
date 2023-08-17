@@ -30,6 +30,6 @@ class SignupForm(FlaskForm):
 
 class EditPhotoForm(FlaskForm):
     description = StringField('Description')
-    category = SelectField('Category', choices=[('',''), ('Flowers & Plants', 'Flowers & Plants'), ('Birds', 'Birds'), ('Animals', 'Animals'), ('Bugs', 'Bugs'), ('Landscapes', 'Landscapes'), ('People', 'People'), ('Other', 'Other')])
+    category = SelectField('Category', choices=[('',''), ('Flowers & Plants', 'Flowers & Plants'), ('Birds', 'Birds'), ('Animals', 'Animals'), ('Bugs', 'Bugs'), ('Landscapes', 'Landscapes'), ('People', 'People'), ('Food', 'Food'), ('Architecture', 'Architecture'), ('Other', 'Other')])
     price = StringField('Price')
     submit = SubmitField('Submit')
