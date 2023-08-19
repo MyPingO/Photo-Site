@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="text-center mt-4">
-    <h1>My Collections</h1>
+    <h1>Collections</h1>
     Browse images based on category
 </div>
 
@@ -20,10 +20,16 @@
                 </a>
             </div>
             <div class="card-footer collections">
-                <button class="btn btn-success buy-collection-btn float-start" data-id="{{ category }}">
+                {% if not current_user.is_authenticated or current_user.collection_purchases.filter_by(category=category).first() == None %}
+                <button class="btn btn-success btn-sm buy-collection-btn float-start" data-id="{{ category }}">
                     Buy Collection ${{ collection_price}}
                 </button>
-                <div class="collection-category float-end">
+                {% elif current_user.is_authenticated and current_user.collection_purchases.filter_by(category=category).first()%}
+                <a href="{{ url_for('collection', category=category) }}" class="btn btn-primary">
+                    View Collection
+                </a>
+                {% endif %}
+                <div class="collection-category">
                     {{ category }}
                 </div>
             </div>
@@ -33,6 +39,16 @@
 {% endfor %}
 
 <script>
+    window.onload = function () {
+        var cards = document.getElementsByClassName('card');
+        for (var i = 0; i < cards.length; i++) {
+            var red = Math.floor(Math.random() * 256);
+            var green = Math.floor(Math.random() * 256);
+            var blue = Math.floor(Math.random() * 256);
+            var opacity = .2;
+            cards[i].style.boxShadow = "rgb(0 0 0 / 20%) 0px 4px 8px 0px, rgb(0 0 0 / 20%) 0px 6px 20px 0px";
+        }
+    };
     document.addEventListener('DOMContentLoaded', function () {
         document.body.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('buy-collection-btn')) {

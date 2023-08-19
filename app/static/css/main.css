@@ -1,10 +1,10 @@
 .navbar {
-    background-color: #f4f4f4 !important;
+    background-color: #f9f9f9 !important;
 }
 
 body {
     font-size: 1.5rem !important;
-    background-color: #ececec;
+    background-color: #f3f3f3;
 }
 
 button {
@@ -17,8 +17,8 @@ a {
 
 .alert {
     margin-top: 10px !important;
-    margin-left: 15% !important;
-    margin-right: 15% !important;
+    margin-left: 5% !important;
+    margin-right: 5% !important;
 }
 
 .galleryContainer {
@@ -33,7 +33,7 @@ a {
         14px -10px 0px 0px rgba(69, 69, 69, 0.3),
         21px -15px 0px 0px rgba(143, 143, 143, 0.3),
         28px -20px 0px 0px rgba(198, 198, 198, 0.3); */
-    animation: fadeInShadow 1s forwards;
+    animation: fadeInShadow 2s forwards;
 }
 .collections {
     border-radius: 0 !important;
@@ -41,6 +41,12 @@ a {
 
 .card-footer {
     background-color: #e9e9e9 !important;
+}
+
+.card-footer.collections {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .card-img-container {
@@ -117,6 +123,34 @@ a {
     /* Ensure that the padding area is white */
 }
 
+
+@media (max-width: 499px) {
+    body {
+        font-size: 1rem !important;
+    }
+
+    button {
+        font-size: 1rem !important;
+    }
+    
+    a {
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 376px) {
+    body {
+        font-size: .75rem !important;
+    }
+    button {
+        font-size: .75rem !important;
+    }
+    
+    a {
+        font-size: .75rem !important;
+    }
+}
+
 @media (max-width: 576px) {
     .modal-dialog {
         max-width: var(--bs-modal-width);
@@ -137,6 +171,17 @@ a {
     }
 
     100% {
-        box-shadow: 7px -5px 0px 0px rgba(0, 0, 0, 0.3), 14px -10px 0px 0px rgba(69, 69, 69, 0.3), 21px -15px 0px 0px rgba(143, 143, 143, 0.3), 28px -20px 0px 0px rgba(198, 198, 198, 0.3);
+        box-shadow: 7px -5px 0px 0px rgba(0, 0, 0, 0.3), 14px -10px 0px 0px rgba(69, 69, 69, 0.3), 21px -15px 0px 0px rgba(143, 143, 143, 0.3), 28px -20px 0px 0px rgba(198, 198, 198, 0.3), rgba(0, 0, 0, 0.2) 0px 4px 8px 0px, rgba(0, 0, 0, 0.2) 0px 6px 20px 0px;
     }
 }
+
+@media (max-width: 767px) {
+    @keyframes fadeInShadow {
+      0% {
+        box-shadow: none;
+      }
+      100% {
+        box-shadow: 7px -5px 0px 0px rgba(69, 69, 69, 0.25), 14px -10px 0px 0px rgba(143, 143, 143, 0.25), rgba(0, 0, 0, 0.2) 0px 4px 8px 0px, rgba(0, 0, 0, 0.2) 0px 6px 20px 0px;
+      }
+    }
+  }

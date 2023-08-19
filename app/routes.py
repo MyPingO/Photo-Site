@@ -39,7 +39,9 @@ def collections():
 def collection(category):
     photos = Photo.query.filter_by(category=category).all()
     shuffle(photos)
-    collection_purchased = True if CollectionPurchase.query.filter_by(category=category, user_id=current_user.id).first() else False
+    collection_purchased = None
+    if current_user.is_authenticated:
+        collection_purchased = True if CollectionPurchase.query.filter_by(category=category, user_id=current_user.id).first() else False
     return render_template('collection.html', photos=photos, category=category, collection_purchased=collection_purchased)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -309,8 +311,8 @@ def download(photo_id):
         return redirect(url_for('gallery'))
 
     # Check if user has purchased photo
-    purchase = Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first()
-    if not purchase and not current_user.is_admin:
+    purchased = Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first() or CollectionPurchase.query.filter_by(user_id=current_user.id, category=photo.category).first()
+    if not purchased and not current_user.is_admin:
         flash('You have not purchased this photo')
         return redirect(url_for('gallery'))
 

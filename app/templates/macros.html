@@ -1,4 +1,4 @@
-{% macro photo_gallery(photos) %}
+{% macro photo_gallery(photos, useFooter=True) %}
 <div class="galleryContainer mt-2">
     <div class="row">
         {% for photo in photos %}
@@ -9,11 +9,12 @@
                         class="card-img-top" alt="{{ photo.filename }}">
                 </div>
                 <div class="card-body">
-                    {% set purchase = current_user.purchases.filter_by(photo_id=photo.id).first() if
-                    current_user.is_authenticated %}
-                    {% set collection_purchased =
-                    current_user.collection_purchases.filter_by(category=photo.category).first() is not none %}
-                    {% if (not purchase and not collection_purchased) and not current_user.is_admin %}
+                    {% set purchased = None %}
+                    {% if current_user.is_authenticated %}
+                    {% set purchased = current_user.purchases.filter_by(photo_id=photo.id).first() or
+                    current_user.collection_purchases.filter_by(category=photo.category).first() %}
+                    {% endif %}
+                    {% if not purchased %}
                     <button data-id="{{ photo.id }}" class="btn btn-success buy-photo-btn">Buy Now ${{ photo.price
                         }}</button>
                     {% else %}
@@ -32,7 +33,7 @@
                     </form>
                     {% endif %}
                 </div>
-                {% if photo.description or photo.category %}
+                {% if photo.description or photo.category and useFooter == True %}
                 <div class="card-footer text-muted d-flex justify-content-between"> <!-- Footer with small text -->
                     <small>
                         {% if photo.description %}
@@ -78,8 +79,7 @@
             var green = Math.floor(Math.random() * 256);
             var blue = Math.floor(Math.random() * 256);
             var opacity = .2;
-            cards[i].style.border = "3px solid rgb(" + red + ", " + green + ", " + blue + ", " + opacity + ")";
-            cards[i].style.boxShadow = "0 4px 8px 0 rgba(" + red + ", " + green + ", " + blue + ", " + opacity + "), 0 6px 20px 0 rgba(" + red + ", " + green + ", " + blue + ", " + opacity + ")";
+            cards[i].style.boxShadow = "rgb(0 0 0 / 20%) 0px 4px 8px 0px, rgb(0 0 0 / 20%) 0px 6px 20px 0px";
         }
     };
 </script>
