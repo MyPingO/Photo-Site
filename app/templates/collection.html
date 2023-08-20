@@ -5,9 +5,10 @@
 
 {% block content %}
 <div class="text-center m-4">
-    <h1>{{category}} Collection</h1>
+    <h1>{{category|safe}} Collection</h1>
     {% if not collection_purchased %}
-    <a href="javascript:void(0);" id="buy-collection-link">Buy this collection</a> to get access to all current and
+    <span href="javascript:void(0);" id="buy-collection-link" class="clickable-link">Buy this collection</span> to get
+    access to all current and
     future photos in this collection.
     {% else %}
     <p>You have already purchased this collection, Thank you!</p>
@@ -18,7 +19,7 @@
 
 <script>
     document.getElementById('buy-collection-link').addEventListener('click', function () {
-        purchaseCollection('{{ category }}');
+        purchaseCollection('{{ category|safe }}');
     });
 
     function purchaseCollection(collectionCategory) {
@@ -45,5 +46,39 @@
             });
     }
 
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('buy-photo-btn')) {
+                const photoId = e.target.getAttribute('data-id');
+                if (photoId) {
+                    purchasePhoto(photoId);
+                }
+            }
+        });
+    });
+
+    function purchasePhoto(photoId) {
+        fetch('/create_payment/photo/' + photoId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error === 'Unauthorized') {
+                    // Redirect the user to the login page
+                    window.location.href = '/login';
+                }
+                else if (data.error === "Already Purchased" || data.error === "Not Found") {
+                    // Redirect the user to the login page
+                    window.location.href = '/gallery';
+                }
+                else {
+                    stripe.redirectToCheckout({
+                        sessionId: data.session_id
+                    }).then(function (result) {
+                        if (result.error) {
+                            console.error(result.error.message);
+                        }
+                    });
+                }
+            });
+    }
 </script>
 {% endblock %}

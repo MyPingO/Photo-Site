@@ -34,16 +34,13 @@
                     {% endif %}
                 </div>
                 {% if photo.description or photo.category and useFooter == True %}
-                <div class="card-footer text-muted d-flex justify-content-between"> <!-- Footer with small text -->
-                    <small>
+                <div class="card-footer d-flex justify-content-between"> <!-- Footer with small text -->
+                    <small class="me-2">
                         {% if photo.description %}
                         {{ photo.description }}
-                        {% if photo.width and photo.height %}
-                        (Dimensions: {{ photo.width }}x{{ photo.height }})
-                        {% endif %}
                         {% endif %}
                     </small>
-                    <small class="float-end">
+                    <small class="float-end text-muted text-end">
                         {% if photo.category %}
                         {{ photo.category }}
                         {% endif %}
@@ -70,17 +67,4 @@
     </div>
     {% endfor %}
 </div>
-<!-- TODO: Check if photos have been purchased in collection -->
-<script>
-    window.onload = function () {
-        var cards = document.getElementsByClassName('card');
-        for (var i = 0; i < cards.length; i++) {
-            var red = Math.floor(Math.random() * 256);
-            var green = Math.floor(Math.random() * 256);
-            var blue = Math.floor(Math.random() * 256);
-            var opacity = .2;
-            cards[i].style.boxShadow = "rgb(0 0 0 / 20%) 0px 4px 8px 0px, rgb(0 0 0 / 20%) 0px 6px 20px 0px";
-        }
-    };
-</script>
 {% endmacro %}

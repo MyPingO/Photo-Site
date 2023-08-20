@@ -70,6 +70,7 @@
 
     {% block content %}
     {% endblock %}
+
   </div>
 
   <footer class="footer mt-auto py-3 bg-light">
@@ -81,5 +82,17 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-fRWOI7FuVyGJiGdeCw0aUmM/7OhVkyuOG4fyb0+BiO4fG4ZYZn/01Vk48rYglcP3"
     crossorigin="anonymous"></script>
+
+  <script>
+    document.addEventListener('contextmenu', function (e) {
+      if (e.target.tagName === 'IMG') {
+        e.preventDefault();
+      }
+    });
+    document.querySelectorAll('img').forEach(function (img) {
+      img.setAttribute('draggable', 'false');
+    });
+  </script>
 </body>
+
 </html>

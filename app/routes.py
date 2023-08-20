@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from .models import CollectionPurchase, Photo, User, Purchase
 from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, EditPhotoForm
-from app import app, db, login_manager
+from app import app, db
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
 from random import shuffle, choice
@@ -81,19 +81,19 @@ def upload():
                 draw = ImageDraw.Draw(watermark)
                 font = ImageFont.truetype("verdana.ttf", img.width // 40 if img.width > img.height else img.height // 40)
                 
-                # Add watermark in 4 corners
+                # Set watermark text positions in 4 corners
                 pos1 = (img.width // 20, img.height // 20)
                 pos2 = (img.width - img.width // 20, img.height // 20)
                 pos3 = (img.width // 20, img.height - img.height // 20)
                 pos4 = (img.width - img.width // 20, img.height - img.height // 20)
 
-                opacity = 192
+                text_opacity = 192
 
-                # Draw them
-                draw.text(pos1, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="la")
-                draw.text(pos2, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="ra")
-                draw.text(pos3, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="lb")
-                draw.text(pos4, watermark_text, font=font, fill=(255, 255, 255, opacity), anchor="rb")
+                # # # Draw them
+                draw.text(pos1, watermark_text, font=font, fill=(255, 255, 255, text_opacity), anchor="la")
+                draw.text(pos2, watermark_text, font=font, fill=(255, 255, 255, text_opacity), anchor="ra")
+                draw.text(pos3, watermark_text, font=font, fill=(255, 255, 255, text_opacity), anchor="lb")
+                draw.text(pos4, watermark_text, font=font, fill=(255, 255, 255, text_opacity), anchor="rb")
                 
                 # Merge the watermark with the original image
                 img = Image.alpha_composite(img_rgba, watermark)
@@ -113,6 +113,7 @@ def upload():
                 # Add to database
                 new_photo = Photo(
                     description=f"(Dimensions: {img.width}x{img.height})",
+                    category='Other',
                     filename=unique_filename,
                     user_id=current_user.id,
                     width=img.width,
@@ -226,6 +227,7 @@ def create_payment(product_type, product_id):
 
     # Initialize common variables
     name = None
+    description = None
     unit_amount = None
     success_url = None
     cancel_url = None
@@ -240,6 +242,7 @@ def create_payment(product_type, product_id):
             return jsonify({'error': "Already Purchased"}), 401
 
         name = 'Photo'
+        description = photo.description
         unit_amount = int(photo.price * 100)
         success_url = url_for('purchase_photo', photo_id=product_id, _external=True)
         cancel_url = url_for('gallery', _external=True)
@@ -254,6 +257,7 @@ def create_payment(product_type, product_id):
             return jsonify({'error': "Already Purchased"}), 401
 
         name = 'Collection: ' + category_name
+        description = 'This buys all present and future photos in this collection'
         unit_amount = int(round(collection_price * 100))
         success_url = url_for('purchase_collection', category_name=category_name, _external=True)
         cancel_url = url_for('collections', _external=True)
@@ -270,6 +274,7 @@ def create_payment(product_type, product_id):
                 'currency': 'usd',
                 'product_data': {
                     'name': name,
+                    'description': description + "\n Watermarks will be removed from purchased photos",
                 },
                 'unit_amount': unit_amount,
             },
