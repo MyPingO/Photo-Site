@@ -112,7 +112,6 @@ def upload():
 
                 # Add to database
                 new_photo = Photo(
-                    description=f"(Dimensions: {img.width}x{img.height})",
                     category='Other',
                     filename=unique_filename,
                     user_id=current_user.id,
@@ -144,13 +143,15 @@ def edit_photo(photo_id):
         return redirect(url_for('gallery'))
     
     form = EditPhotoForm()
+    form.category.data = photo.category
     image = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], 'originals', photo.filename))
     image = ImageOps.exif_transpose(image)
-    image_width, image_height = image.width, image.height
     if form.validate_on_submit():
-        photo.description = str(form.description.data.strip() + f" (Dimensions: {image_width}x{image_height})") if form.description.data else photo.description
+        photo.description = str(form.description.data.strip()) if form.description.data else photo.description
         photo.category = form.category.data if form.category.data else photo.category
         photo.price = form.price.data if form.price.data else photo.price
+        photo.width = image.width
+        photo.height = image.height
         db.session.commit()
         flash('Photo updated')
         return redirect(url_for('gallery'))
@@ -242,7 +243,7 @@ def create_payment(product_type, product_id):
             return jsonify({'error': "Already Purchased"}), 401
 
         name = 'Photo'
-        description = photo.description
+        description = photo.description + f" (Dimensions: {photo.width}x{photo.height})"
         unit_amount = int(photo.price * 100)
         success_url = url_for('purchase_photo', photo_id=product_id, _external=True)
         cancel_url = url_for('gallery', _external=True)
@@ -274,7 +275,7 @@ def create_payment(product_type, product_id):
                 'currency': 'usd',
                 'product_data': {
                     'name': name,
-                    'description': description + "\n Watermarks will be removed from purchased photos",
+                    'description': description + ". Watermarks will be removed from purchased photos",
                 },
                 'unit_amount': unit_amount,
             },

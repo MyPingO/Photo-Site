@@ -10,13 +10,13 @@
             <form method="POST">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
-                    {{ form.description.label }} {{ form.description(class="form-control") }}
+                    {{ form.description.label }} {{ form.description(class="form-control", value=photo.description) }}
                 </div>
                 <div class="mb-3">
-                    {{ form.category.label }} {{ form.category(class="form-select") }}
+                    {{ form.category.label }} {{ form.category(class="form-select", value=photo.category) }}
                 </div>
                 <div class="mb-3">
-                    {{ form.price.label }} {{ form.price(class="form-control") }}
+                    {{ form.price.label }} {{ form.price(class="form-control", value=photo.price) }}
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
