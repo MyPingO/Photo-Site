@@ -41,11 +41,6 @@
                             {{ photo.description }}
                             {% endif %}
                         </span>
-                        <span class="dimension-text text-muted">
-                            {% if photo.width and photo.height %}
-                            (Dimensions: {{ photo.width }} x {{ photo.height }})
-                            {% endif %}
-                        </span>
                     </small>
                     <small class="category-text float-end text-muted text-end">
                         {% if photo.category %}
@@ -75,7 +70,7 @@
     {% endfor %}
 </div>
 
-<script>
+<!-- <script>
     const whitespace = 50;
     const descriptionTexts = document.getElementsByClassName('description-text');
     const dimensionTexts = document.getElementsByClassName('dimension-text');
@@ -113,6 +108,6 @@
     // Call the toggleDimensionText function initially and whenever the window is resized
     toggleDimensionText();
     window.addEventListener('resize', toggleDimensionText);
-</script>
+</script> -->
 
 {% endmacro %}
