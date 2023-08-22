@@ -116,6 +116,7 @@ def upload():
                 # Add to database
                 new_photo = Photo(
                     category='Other',
+                    description='',
                     filename=unique_filename,
                     user_id=current_user.id,
                     width=img.width,
