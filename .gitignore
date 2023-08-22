@@ -18,4 +18,6 @@ Thumbs.db
 # folders to be ignored
 env/
 
+.env
+
 launch.json

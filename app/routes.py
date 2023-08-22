@@ -1,14 +1,16 @@
 from datetime import datetime
 from flask import jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
-from flask_login import login_required, current_user, login_user
+from flask_login import login_required, current_user, login_user, logout_user
+from flask_mail import Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from .models import CollectionPurchase, Photo, User, Purchase
-from .forms import PhotoUploadForm, PurchaseSearchForm, LoginForm, SignupForm, EditPhotoForm
-from app import app, db
+from .forms import ForgotPasswordForm, PhotoUploadForm, PurchaseSearchForm, LoginForm, ResetPasswordForm, SignupForm, EditPhotoForm
+from app import app, db, mail
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
 from random import shuffle, choice
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import re, os, stripe
 
 collection_categories = ['Flowers & Plants', 'Animals', 'Birds', 'Bugs', 'Landscapes', 'Food', 'People', 'Architecture', 'Other']
@@ -79,7 +81,8 @@ def upload():
                 # Create a blank RGBA image with the same size as the original image
                 watermark = Image.new('RGBA', img.size, (255, 255, 255, 0))
                 draw = ImageDraw.Draw(watermark)
-                font = ImageFont.truetype("verdana.ttf", img.width // 40 if img.width > img.height else img.height // 40)
+                verdana_font_path = os.path.abspath("static/fonts/verdana.ttf")
+                font = ImageFont.truetype(verdana_font_path, img.width // 40 if img.width > img.height else img.height // 40)
                 
                 # Set watermark text positions in 4 corners
                 pos1 = (img.width // 20, img.height // 20)
@@ -362,6 +365,92 @@ def signup():
 
     return render_template('signup.html', form=form)
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            token = generate_reset_token(email)
+            send_reset_email(email, token)
+
+        flash("If an account with that email exists, an email has been sent with instructions to reset your password <br> <small>Please check your spam folder if you don't see an email in your inbox</small>", 'info')
+        return redirect(url_for('login'))
+    return render_template('forgot_password.html', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    
+    try:
+        email = serializer.loads(token, salt=app.config['SECURITY_PASSWORD_SALT'], max_age=3600)
+    except SignatureExpired:
+        flash('The reset link has expired', 'warning')
+        return redirect(url_for('login'))
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if user is None:
+        flash('Invalid reset link', 'warning')
+        return redirect(url_for('login'))
+
+    form = ResetPasswordForm()
+    
+    if form.validate_on_submit():
+        if form.password.data != form.confirm_password.data:
+            flash('Passwords do not match', 'warning')
+            return redirect(url_for('reset_password', token=token))
+        user.password = generate_password_hash(form.password.data) # You might need to hash this password before saving
+        db.session.commit()
+        flash('Your password has been reset!', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', form=form)
+
+def generate_reset_token(email):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
+
+def send_reset_email(email, token):
+    reset_url = url_for('reset_password', token=token, _external=True)
+    msg = Message('Reset Your Password', sender=app.config['MAIL_USERNAME'], recipients=[email])
+    msg.body = f"""
+    A request has been made to reset your password for Ping's Photos.
+    Click the following link to reset your password: {reset_url}
+    If you did not make this request then simply ignore this email and no changes will be made.
+    """
+    msg.html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                }}
+                .content {{
+                    max-width: 600px;
+                    margin: auto;
+                }}
+                a {{
+                    color: #007bff;
+                    text-decoration: none;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="content">
+                <p>A request has been made to reset your password for <strong>Ping's Photos</strong>.</p>
+                <p><a href="{reset_url}">Click here</a> to reset your password.</p>
+                <p>If you did not make this request then simply ignore this email and no changes will be made.</p>
+            </div>
+        </body>
+        </html>
+    """
+    mail.send(msg)
+
 @app.route('/admin/search_purchases', methods=['GET', 'POST'])
 @login_required
 def search_purchases():
@@ -377,6 +466,12 @@ def search_purchases():
             User.username.contains(search_term)
         ).all()
     return render_template('search_purchases.html', form=form, purchases=purchases)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('gallery'))
 
 def check_signup_data(username, email, password):
     # Check if username is already taken

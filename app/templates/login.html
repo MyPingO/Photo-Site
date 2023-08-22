@@ -6,14 +6,19 @@
         <h1>Login</h1>
     </div>
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div style="max-width: 500px;">
             <form method="POST">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.username.label }} {{ form.username(class="form-control") }}
                 </div>
                 <div class="mb-3">
-                    {{ form.password.label }} {{ form.password(class="form-control") }}
+                    <label for="{{ form.password.id_for_label }}">
+                        <!-- Custom label including the 'Forgot password?' link -->
+                        <span>Password</span>
+                        <small><a href="forgot_password" style="text-decoration: none;">Forgot password?</a></small>
+                    </label>
+                    {{ form.password(class="form-control") }}
                 </div>
                 <div class="mb-3">
                     {{ form.remember(class="form-check-input") }} {{ form.remember.label }}

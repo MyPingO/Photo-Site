@@ -3,13 +3,22 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_migrate import Migrate
+from flask_mail import Mail
 import os, stripe
 
 database_name = 'PingPhotos.db'
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '34098-5849yt-3we[0k3299'
+app.config['SECURITY_PASSWORD_SALT'] = app.config['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_name}'
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'images')
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = os.environ.get('Email')
+app.config['MAIL_PASSWORD'] = os.environ.get('EmailPassword')
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+mail = Mail(app)
 
 images = UploadSet('images', IMAGES)
 app.config['UPLOADED_IMAGES_DEST'] = app.config['UPLOAD_FOLDER']

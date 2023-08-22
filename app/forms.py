@@ -33,3 +33,12 @@ class EditPhotoForm(FlaskForm):
     category = SelectField('Category', choices=[('',''), ('Flowers & Plants', 'Flowers & Plants'), ('Birds', 'Birds'), ('Animals', 'Animals'), ('Bugs', 'Bugs'), ('Landscapes', 'Landscapes'), ('People', 'People'), ('Food', 'Food'), ('Architecture', 'Architecture'), ('Other', 'Other')])
     price = StringField('Price')
     submit = SubmitField('Submit')
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Reset Password')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
