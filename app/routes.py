@@ -11,10 +11,13 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
 from random import shuffle, choice
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from stripe.error import SignatureVerificationError
 import re, os, stripe
 
 collection_categories = ['Flowers & Plants', 'Animals', 'Birds', 'Bugs', 'Landscapes', 'Food', 'People', 'Architecture', 'Other']
 collection_price = 19.99
+
+# TODO: Add Contact Route
 
 # two decorators, same function
 @app.route('/')
@@ -147,7 +150,6 @@ def edit_photo(photo_id):
         return redirect(url_for('gallery'))
     
     form = EditPhotoForm()
-    form.category.data = photo.category
     image = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], 'originals', photo.filename))
     image = ImageOps.exif_transpose(image)
     if form.validate_on_submit():
@@ -183,46 +185,6 @@ def delete_photo(photo_id):
         flash('Photo deleted')
         return redirect(url_for('gallery'))
 
-@app.route('/purchase_photo/<int:photo_id>')
-@login_required
-def purchase_photo(photo_id):
-    # Check if photo exists
-    photo = Photo.query.get(photo_id)
-    if not photo:
-        flash('Photo not found')
-        return redirect(url_for('gallery'))
-    if Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first():
-        flash('Photo already purchased')
-        return redirect(url_for('gallery'))
-
-    new_purchase = Purchase(user_id=current_user.id, photo_id=photo.id)
-
-    db.session.add(new_purchase)
-    db.session.commit()
-
-    flash('Photo purchased successfully, you can now download it from the My Photos page')
-    return redirect(url_for('gallery'))
-
-@app.route('/purchase_collection/<category_name>')
-@login_required
-def purchase_collection(category_name):
-    # Check if collection exists
-    if category_name not in collection_categories:
-        flash('Collection not found')
-        return redirect(url_for('collections'))
-
-    if CollectionPurchase.query.filter_by(user_id=current_user.id, category=category_name).first():
-        flash('Collection already purchased')
-        return redirect(url_for('collections'))
-
-    new_collection_purchase = CollectionPurchase(user_id=current_user.id, category=category_name)
-
-    db.session.add(new_collection_purchase)
-    db.session.commit()
-
-    flash('Collection purchased successfully, all present and future photos in this collection can now be downloaded from the My Photos page')
-    return redirect(url_for('collections'))
-
 @app.route('/create_payment/<product_type>/<product_id>')
 def create_payment(product_type, product_id):
     # Check if user is authenticated
@@ -249,7 +211,7 @@ def create_payment(product_type, product_id):
         name = 'Photo'
         description = (photo.description or '') + f" (Dimensions: {photo.width}x{photo.height})"
         unit_amount = int(photo.price * 100)
-        success_url = url_for('purchase_photo', photo_id=product_id, _external=True)
+        success_url = url_for('thank_you', _external=True)
         cancel_url = url_for('gallery', _external=True)
 
     elif product_type == 'collection':
@@ -264,13 +226,12 @@ def create_payment(product_type, product_id):
         name = 'Collection: ' + category_name
         description = 'This buys all present and future photos in this collection'
         unit_amount = int(round(collection_price * 100))
-        success_url = url_for('purchase_collection', category_name=category_name, _external=True)
+        success_url = url_for('thank_you', category_name=category_name, _external=True)
         cancel_url = url_for('collections', _external=True)
 
     else:
         flash('Invalid product')
         return redirect(url_for('gallery'))
-    print(stripe.api_key)
     # Create a Stripe session for payment using the defined variables
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -285,6 +246,11 @@ def create_payment(product_type, product_id):
             },
             'quantity': 1,
         }],
+        metadata={
+            'user_id': current_user.id,
+            'product_type': product_type,
+            'product_id': product_id
+        },
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url
@@ -292,6 +258,69 @@ def create_payment(product_type, product_id):
 
     return jsonify(session_id=session.id)
 
+@app.route('/thank_you')
+def thank_you():
+    return render_template('thank_you.html')
+
+
+@app.route('/stripe_webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get('stripe-signature')
+    endpoint_secret = os.environ.get('StripeWebhookSecret')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except SignatureVerificationError:
+        return 'Signature verification failed', 400
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        product_type = session['metadata']['product_type']
+        product_id = session['metadata']['product_id']
+        user_id = session['metadata']['user_id']
+
+        if product_type == 'photo':
+            success, message = purchase_photo(product_id, user_id)
+        elif product_type == 'collection':
+            success, message = purchase_collection(product_id, user_id)
+
+        if not success:
+            # Handle the error case, maybe log the message
+            return message, 400
+
+    return 'Success', 200
+
+def purchase_photo(photo_id, user_id):
+    # Check if photo exists
+    photo = Photo.query.get(photo_id)
+    if not photo:
+        return False, 'Photo not found'
+    if Purchase.query.filter_by(user_id=user_id, photo_id=photo.id).first():
+        return False, 'Photo already purchased'
+
+    new_purchase = Purchase(user_id=user_id, photo_id=photo.id)
+    db.session.add(new_purchase)
+    db.session.commit()
+
+    return True, 'Photo purchased successfully'
+
+def purchase_collection(category_name, user_id):
+    # Check if collection exists
+    if category_name not in collection_categories:
+        return False, 'Collection not found'
+
+    if CollectionPurchase.query.filter_by(user_id=user_id, category=category_name).first():
+        return False, 'Collection already purchased'
+
+    new_collection_purchase = CollectionPurchase(user_id=user_id, category=category_name)
+    db.session.add(new_collection_purchase)
+    db.session.commit()
+
+    return True, 'Collection purchased successfully'
 
 @app.route('/my_photos')
 @login_required
