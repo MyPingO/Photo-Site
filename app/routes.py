@@ -38,7 +38,7 @@ def collections():
         photos = Photo.query.filter_by(category=category).all()
         random_images[category] = choice(photos) if photos else None
 
-    return render_template('collections.html', categories=categories, random_images=random_images, collection_price=collection_price)
+    return render_template('collections.html', categories=categories, random_images=random_images, collection_price=collection_price, title='Collections')
 
 @app.route('/collection/<category>')
 def collection(category):
@@ -47,7 +47,7 @@ def collection(category):
     collection_purchased = None
     if current_user.is_authenticated:
         collection_purchased = True if CollectionPurchase.query.filter_by(category=category, user_id=current_user.id).first() else False
-    return render_template('collection.html', photos=photos, category=category, collection_purchased=collection_purchased)
+    return render_template('collection.html', photos=photos, category=category, collection_purchased=collection_purchased, title=category)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -132,7 +132,7 @@ def upload():
         flash('File successfully uploaded')
         return redirect(url_for('gallery'))
 
-    return render_template('upload.html', form=form)
+    return render_template('upload.html', form=form, title='Upload')
 
 def distance(p1, p2):
     return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
@@ -162,7 +162,7 @@ def edit_photo(photo_id):
         flash('Photo updated')
         return redirect(url_for('gallery'))
     else:
-        return render_template('edit_photo.html', form=form, photo=photo)
+        return render_template('edit_photo.html', form=form, photo=photo, title='Edit Photo')
 
 @app.route('/delete_photo/<int:photo_id>', methods=['POST'])
 @login_required
@@ -261,7 +261,7 @@ def create_payment(product_type, product_id):
 @app.route('/thank_you')
 @login_required
 def thank_you():
-    return render_template('thank_you.html')
+    return render_template('thank_you.html', title='Thank You')
 
 
 @app.route('/stripe_webhook', methods=['POST'])
@@ -372,7 +372,7 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
 
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, title='Login')
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -394,7 +394,7 @@ def signup():
         login_user(new_user, form.remember.data)
         return redirect(url_for('gallery'))
 
-    return render_template('signup.html', form=form)
+    return render_template('signup.html', form=form, title='Signup')
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -409,7 +409,7 @@ def forgot_password():
 
         flash("If an account with that email exists, an email has been sent with instructions to reset your password <br> <small>Please check your spam folder if you don't see an email in your inbox</small>", 'info')
         return redirect(url_for('login'))
-    return render_template('forgot_password.html', form=form)
+    return render_template('forgot_password.html', form=form, title='Forgot Password')
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -438,7 +438,7 @@ def reset_password(token):
         flash('Your password has been reset!', 'success')
         return redirect(url_for('login'))
 
-    return render_template('reset_password.html', form=form)
+    return render_template('reset_password.html', form=form, title='Reset Password')
 
 def generate_reset_token(email):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
@@ -496,7 +496,7 @@ def search_purchases():
         purchases = Purchase.query.join(User).filter(
             User.username.contains(search_term)
         ).all()
-    return render_template('search_purchases.html', form=form, purchases=purchases)
+    return render_template('search_purchases.html', form=form, purchases=purchases, title='Search Purchases')
 
 @app.route('/logout')
 @login_required
@@ -539,7 +539,7 @@ def contact():
         flash('An email has been sent to Ping\'s Photos. We will get back to you as soon as possible!', 'success')
         return redirect(url_for('gallery'))  # Redirect to home or any other page
 
-    return render_template('contact.html', form=form)
+    return render_template('contact.html', form=form, title='Contact')
 
 @app.route('/sitemap')
 @app.route('/sitemap.xml')
