@@ -245,9 +245,9 @@ def create_payment(product_type, product_id):
         elif Purchase.query.filter_by(user_id=current_user.id, photo_id=photo.id).first():
             flash('Photo already purchased')
             return jsonify({'error': "Already Purchased"}), 401
-
+        
         name = 'Photo'
-        description = photo.description + f" (Dimensions: {photo.width}x{photo.height})"
+        description = (photo.description or '') + f" (Dimensions: {photo.width}x{photo.height})"
         unit_amount = int(photo.price * 100)
         success_url = url_for('purchase_photo', photo_id=product_id, _external=True)
         cancel_url = url_for('gallery', _external=True)
