@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://www.pingsphotos.com/</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/gallery</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/collections</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/login</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/signup</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/contact</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/collection/Birds</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/collection/Flowers%20%26%20Plants</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/collection/Bugs</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/collection/Animals</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/collection/Other</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.pingsphotos.com/forgot_password</loc>
+  <lastmod>2023-08-22T19:18:33+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>

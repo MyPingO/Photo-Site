@@ -539,3 +539,7 @@ def contact():
         return redirect(url_for('gallery'))  # Redirect to home or any other page
 
     return render_template('contact.html', form=form)
+
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory('static', 'sitemap.xml')
