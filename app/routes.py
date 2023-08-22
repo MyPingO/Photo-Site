@@ -5,7 +5,7 @@ from flask_mail import Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from .models import CollectionPurchase, Photo, User, Purchase
-from .forms import ForgotPasswordForm, PhotoUploadForm, PurchaseSearchForm, LoginForm, ResetPasswordForm, SignupForm, EditPhotoForm
+from .forms import ContactForm, ForgotPasswordForm, PhotoUploadForm, PurchaseSearchForm, LoginForm, ResetPasswordForm, SignupForm, EditPhotoForm
 from app import app, db, mail
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
@@ -519,4 +519,23 @@ def check_signup_data(username, email, password):
     if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$', password):
         flash('Password is not strong enough')
         return redirect(url_for('signup'))
-    
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        subject = form.subject.data
+        sender_email = 'contact.pingsphotos@gmail.com' # Your email
+        user_email = form.email.data
+        message_body = f"From: {form.name.data} <{user_email}>\n\nMessage:\n{form.message.data}"
+
+        msg = Message(subject, sender=sender_email, recipients=[sender_email])
+        msg.body = message_body
+        msg.reply_to = user_email # Set reply-to to the user's email
+
+        mail.send(msg)
+
+        flash('An email has been sent to Ping\'s Photos. We will get back to you as soon as possible!', 'success')
+        return redirect(url_for('gallery'))  # Redirect to home or any other page
+
+    return render_template('contact.html', form=form)

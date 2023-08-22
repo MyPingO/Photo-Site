@@ -69,45 +69,4 @@
     </div>
     {% endfor %}
 </div>
-
-<!-- <script>
-    const whitespace = 50;
-    const descriptionTexts = document.getElementsByClassName('description-text');
-    const dimensionTexts = document.getElementsByClassName('dimension-text');
-    const categoryTexts = document.getElementsByClassName('category-text');
-
-    function toggleDimensionText() {
-        for (let i = 0; i < descriptionTexts.length; i++) {
-            const descriptionText = descriptionTexts[i];
-            const dimensionText = dimensionTexts[i];
-            const categoryText = categoryTexts[i];
-            const footer = descriptionText.parentElement.parentElement;
-            const footerWidth = footer.offsetWidth;
-            let dimensionTextWidth = dimensionText.offsetWidth;
-            const descriptionTextWidth = descriptionText.offsetWidth;
-            const categoryTextWidth = categoryText.offsetWidth;
-
-            if (window.getComputedStyle(dimensionText).display == 'block') {
-                if (!enoughSpace(footerWidth, descriptionTextWidth, dimensionTextWidth, categoryTextWidth)) {
-                    dimensionText.style.display = 'none';
-                }
-            }
-            if (window.getComputedStyle(dimensionText).display == 'none') {
-                dimensionText.style.display = 'block';
-                dimensionTextWidth = dimensionText.offsetWidth;
-                if (enoughSpace(footerWidth, descriptionTextWidth, dimensionTextWidth, categoryTextWidth)) break;
-                else dimensionText.style.display = 'none';
-            }
-        }
-    }
-
-    function enoughSpace(footerWidth, descriptionTextWidth, dimensionTextWidth, categoryTextWidth) {
-        return footerWidth >= descriptionTextWidth + dimensionTextWidth + categoryTextWidth + whitespace;
-    }
-
-    // Call the toggleDimensionText function initially and whenever the window is resized
-    toggleDimensionText();
-    window.addEventListener('resize', toggleDimensionText);
-</script> -->
-
 {% endmacro %}

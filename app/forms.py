@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileRequired, FileAllowed, DataRequired
-from wtforms import SubmitField, StringField, PasswordField, BooleanField, MultipleFileField, SelectField
+from flask_wtf.file import FileAllowed, DataRequired
+from wtforms import SubmitField, StringField, PasswordField, BooleanField, MultipleFileField, SelectField, TextAreaField
 from flask_uploads import UploadSet, IMAGES
 from wtforms.validators import Length, EqualTo, Email
 
@@ -42,3 +42,10 @@ class ResetPasswordForm(FlaskForm):
     password = PasswordField('New Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')
+
+class ContactForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    subject = StringField('Subject')
+    message = TextAreaField('Message', validators=[DataRequired()])
+    submit = SubmitField('Submit')

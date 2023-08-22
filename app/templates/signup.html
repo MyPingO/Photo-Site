@@ -20,6 +20,14 @@
                 </div>
                 <div class="mb-3">
                     {{ form.confirm_password.label }} {{ form.confirm_password(class="form-control") }}
+                    <!-- Error message for mismatched passwords -->
+                    {% if form.confirm_password.errors %}
+                        <div class="text-danger">
+                            {% for error in form.confirm_password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
