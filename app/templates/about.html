@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center">About Ping's Photos</h1>
+        <p class="lead fs-4">Welcome to Ping's Photos! My love for photography goes beyond mere pictures on the screen. It's about capturing the essence of the world's beauty and sharing it with others. Photography is not just my hobby; it's my passion and a part of who I am.</p>
+
+        <p class="lead fs-4">By purchasing my photos, you're not only acquiring a piece of art but also supporting my lifelong pursuit of beauty through the lens. Whether you buy individual photos or full collections, your support provides extra income that fuels my creativity and sustains my daily life.</p>
+
+        <h2 class="mt-4">Explore the Website</h2>
+        <ul>
+            <li class="list-group-item"><a href="{{ url_for('gallery') }}" class="link">Gallery</a> - Browse and purchase individual photos from various categories.</li>
+            <li class="list-group-item"><a href="{{ url_for('collections') }}" class="link">Collections</a> - Explore themed collections of photos, available for purchase in bundles.</li>
+            <li class="list-group-item"><a href="{{ url_for('my_photos') }}" class="link">My Photos</a> - View and manage the photos you've purchased.</li>
+            <li class="list-group-item"><a href="{{ url_for('contact') }}" class="link">Contact</a> - Have a question? Want to request a specific photo? Get in touch with me here.</li>
+        </ul>
+
+        <p class="lead mt-4 fs-3">Thank you for exploring Ping's Photos! Your interest in my galleries and collections supports my love for photography. I hope you enjoy the journey through my lens as much as I enjoy capturing these moments.</p>
+    </div>
+{% endblock %}

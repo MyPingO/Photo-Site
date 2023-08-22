@@ -25,7 +25,7 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-  <nav class="navbar navbar-expand-sm">
+  <nav class="navbar navbar-expand-md">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for('gallery') }}">Ping's Photos</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -62,6 +62,9 @@
           {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('about') }}">About</a>
         </ul>
       </div>
     </div>

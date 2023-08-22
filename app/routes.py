@@ -541,6 +541,10 @@ def contact():
 
     return render_template('contact.html', form=form, title='Contact')
 
+@app.route('/about')
+def about():
+    return render_template('about.html', title='About')
+
 @app.route('/sitemap')
 @app.route('/sitemap.xml')
 def sitemap():
