@@ -259,6 +259,7 @@ def create_payment(product_type, product_id):
     return jsonify(session_id=session.id)
 
 @app.route('/thank_you')
+@login_required
 def thank_you():
     return render_template('thank_you.html')
 
@@ -540,6 +541,7 @@ def contact():
 
     return render_template('contact.html', form=form)
 
+@app.route('/sitemap')
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
