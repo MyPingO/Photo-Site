@@ -8,7 +8,7 @@ import os, stripe
 
 database_name = 'PingPhotos.db'
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '34098-5849yt-3we[0k3299'
+app.config['SECRET_KEY'] = 'os.environ.get("FlaskSecretKey")'
 app.config['SECURITY_PASSWORD_SALT'] = app.config['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_name}'
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'images')
