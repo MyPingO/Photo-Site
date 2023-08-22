@@ -433,6 +433,9 @@ def reset_password(token):
         if form.password.data != form.confirm_password.data:
             flash('Passwords do not match', 'warning')
             return redirect(url_for('reset_password', token=token))
+        if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$', form.password.data):
+            flash('Password is not strong enough', 'warning')
+            return redirect(url_for('reset_password', token=token))
         user.password = generate_password_hash(form.password.data) # You might need to hash this password before saving
         db.session.commit()
         flash('Your password has been reset!', 'success')
