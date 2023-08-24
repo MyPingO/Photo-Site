@@ -383,7 +383,10 @@ def signup():
         email = form.email.data
         password = form.password.data
 
-        check_signup_data(username, email, password)
+        account_validation = check_signup_data(username, email, password)
+
+        if account_validation == False:
+            return redirect(url_for('signup'))
 
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, email=email, password=hashed_password)
@@ -485,6 +488,29 @@ def send_reset_email(email, token):
     """
     mail.send(msg)
 
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
+    # Ensure that only admins can access this page
+    if not current_user.is_admin:
+        return redirect(url_for('gallery'))
+
+    users = User.query.all()
+    purchases = Purchase.query.all()
+    collection_purchases = CollectionPurchase.query.all()
+
+    # Handle editing user information
+    if request.method == 'POST':
+        user_id = request.form['user_id']
+        user = User.query.get(user_id)
+        if user:
+            user.username = request.form['username']
+            user.email = request.form['email']
+            # Other fields you want to edit
+            db.session.commit()
+
+    return render_template('admin.html', users=users, purchases=purchases, collection_purchases=collection_purchases, title='Admin')
+
 @app.route('/admin/search_purchases', methods=['GET', 'POST'])
 @login_required
 def search_purchases():
@@ -507,22 +533,27 @@ def logout():
     logout_user()
     return redirect(url_for('gallery'))
 
-def check_signup_data(username, email, password):
+def check_signup_data(username, email, password) -> bool:
+
+    details_valid = True
+
     # Check if username is already taken
     user = User.query.filter_by(username=username).first()
     if user:
         flash('Username already taken')
-        return redirect(url_for('signup'))
+        details_valid = False
     # Check if email is already taken
     user = User.query.filter_by(email=email).first()
     if user:
         flash('Email already taken')
-        return redirect(url_for('signup'))
+        details_valid = False
     # Check if password is not strong enough
     # must have at least 8 characters, one uppercase, one lowercase, one number, and one special character
     if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$', password):
         flash('Password is not strong enough')
-        return redirect(url_for('signup'))
+        details_valid = False
+    
+    return details_valid
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():

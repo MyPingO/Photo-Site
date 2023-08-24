@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="text-center mb-5">Admin Dashboard</h1>
+
+    <h2 class="mb-4">All Users</h2>
+    <div class="row">
+        {% for user in users %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <div class="mb-3">
+                            <label class="form-label">Username:</label>
+                            <input type="text" class="form-control" name="username" value="{{ user.username }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email:</label>
+                            <input type="text" class="form-control" name="email" value="{{ user.email }}">
+                        </div>
+                        <!-- Other fields you want to edit -->
+                        <button type="submit" class="btn btn-primary w-100">Edit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-5">
+        <h2 class="mb-4">All Purchases</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Username</th>
+                    <th>Email</th> <!-- Added Email Header -->
+                    <th>Photo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for purchase in purchases %}
+                    <tr>
+                        <td>{{ purchase.date_pretty() }}</td>
+                        <td>{{ purchase.user.username }}</td>
+                        <td>{{ purchase.user.email }}</td> <!-- Added Email Data -->
+                        <td>{{ purchase.photo.filename }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
