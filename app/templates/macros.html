@@ -3,7 +3,7 @@
     <div class="row justify-content-center">
         {% for photo in photos %}
         <div class="col-lg-6 col-md-10 col-sm-12">
-            <div class="card mb-4">
+            <div class="card shadow mb-4">
                 <div class="card-img-container">
                     <img src="{{ url_for('static', filename='images/thumbnails/' + photo.filename) }}"
                         class="card-img-top" alt="{{ photo.filename }}">
