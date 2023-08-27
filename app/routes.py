@@ -37,9 +37,11 @@ def photo_detail(photo_id, photo_description):
         camera_make = img.getexif().get(271)
         camera_model = img.getexif().get(272)
 
+        exif_transpose = ImageOps.exif_transpose(img)
+        dimesnions = exif_transpose.size
 
         img_info = {
-            "Dimensions": f"{img.size[0]} x {img.size[1]}",
+            "Dimensions": f"{dimesnions[0]} x {dimesnions[1]}",
             "Format": img.format,
             "Mode": img.mode,
             "Size": f"{round(os.path.getsize(original_image_path) / 1024)} KB",
