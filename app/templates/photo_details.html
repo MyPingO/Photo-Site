@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container my-4" style="max-width: 750px;">
+    <div class="card">
+        <!-- Card image -->
+        <div class="card-img-container">
+            <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}" class="card-img-top"
+                alt="{{ photo.filename }}">
+        </div>
+
+        <!-- Card body -->
+        <div class="card-body bg-light">
+            <div class="container">
+                <div class="row">
+                    <!-- Title and Description -->
+                    <span class="lead fs-2 text-center">{{ photo.description }}</span>
+
+                    <div class="buttons mt-3">
+                        <!-- Price and Buy Button -->
+                        <button data-id="{{ photo.id }}" class="btn btn-success buy-photo-btn">Buy Now ${{
+                            photo.price }}</button>
+
+                        <!-- Full Preview Button -->
+                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal"
+                            data-bs-target="#previewModal">Full Preview</button>
+                    </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="row mt-4">
+                    <div class="col">
+                        <table class="table table-bordered">
+                            <tbody>
+                                {% for key, value in img_info.items() %}
+                                <tr>
+                                    <td>{{ key }}</td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg d-flex">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="zoom-img-container">
+                    <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}" class="modal-img"
+                        alt="{{ photo.filename }}">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('buy-photo-btn')) {
+                const photoId = e.target.getAttribute('data-id');
+                if (photoId) {
+                    purchasePhoto(photoId);
+                }
+            }
+        });
+    });
+
+    function purchasePhoto(photoId) {
+        fetch('/create_payment/photo/' + photoId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error === 'Unauthorized') {
+                    // Redirect the user to the login page
+                    window.location.href = '/login';
+                }
+                else if (data.error === "Already Purchased" || data.error === "Not Found") {
+                    // Redirect the user to the login page
+                    window.location.href = '/gallery';
+                }
+                else {
+                    stripe.redirectToCheckout({
+                        sessionId: data.session_id
+                    }).then(function (result) {
+                        if (result.error) {
+                            console.error(result.error.message);
+                        }
+                    });
+                }
+            });
+    }
+</script>
+{% endblock %}

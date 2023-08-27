@@ -14,10 +14,8 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from stripe.error import SignatureVerificationError
 import re, os, stripe
 
-collection_categories = ['Flowers & Plants', 'Animals', 'Birds', 'Bugs', 'Landscapes', 'Food', 'People', 'Architecture', 'Other']
+collection_categories = ['Flowers & Plants', 'Animals', 'Birds', 'Bugs', 'Vehicles', 'Landscapes', 'Food', 'People', 'Architecture', 'Other']
 collection_price = 19.99
-
-# TODO: Add Contact Route
 
 # two decorators, same function
 @app.route('/')
@@ -26,6 +24,29 @@ def gallery():
     photos = Photo.query.all()
     shuffle(photos)
     return render_template('gallery.html', title='Gallery', photos=photos)
+
+@app.route('/gallery/<photo_id>-<photo_description>')
+def photo_detail(photo_id, photo_description):
+    photo = Photo.query.filter_by(id=photo_id, description=photo_description).first()
+    if photo is None:
+        flash('Photo not found')
+        return redirect(url_for('gallery'))
+    
+    original_image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'originals', photo.filename)
+    with Image.open(original_image_path) as img:
+        camera_make = img.getexif().get(271)
+        camera_model = img.getexif().get(272)
+
+
+        img_info = {
+            "Dimensions": f"{img.size[0]} x {img.size[1]}",
+            "Format": img.format,
+            "Mode": img.mode,
+            "Size": f"{round(os.path.getsize(original_image_path) / 1024)} KB",
+            "Camera": f"{camera_make} {camera_model}" if camera_make and camera_model else None,
+        }
+    
+    return render_template('photo_details.html', photo=photo, img_info=img_info, title=photo_description)
 
 @app.route('/collections')
 def collections():
@@ -423,6 +444,9 @@ def reset_password(token):
     except SignatureExpired:
         flash('The reset link has expired', 'warning')
         return redirect(url_for('login'))
+    except:
+        flash('Something went wrong, please try again with another link', 'warning')
+        return redirect(url_for('forgot_password'))
     
     user = User.query.filter_by(email=email).first()
     

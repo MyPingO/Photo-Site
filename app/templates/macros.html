@@ -3,10 +3,12 @@
     <div class="row justify-content-center">
         {% for photo in photos %}
         <div class="col-lg-6 col-md-10 col-sm-12">
-            <div class="card shadow mb-4">
-                <div class="card-img-container">
+            <div class="card mb-4">
+                <!-- Wrap the image in a div with a click event to open the modal -->
+                <div class="card-img-container" data-bs-toggle="modal"
+                    data-bs-target="#previewModal{{ loop.index }}" style="cursor: pointer;">
                     <img src="{{ url_for('static', filename='images/thumbnails/' + photo.filename) }}"
-                        class="card-img-top" alt="{{ photo.filename }}">
+                        class="card-img-top cursor-pointer" alt="{{ photo.filename }}">
                 </div>
                 <div class="card-body">
                     {% set purchased = None %}
@@ -20,8 +22,9 @@
                     {% else %}
                     <a href="{{ url_for('download', photo_id=photo.id) }}" class="btn btn-danger">Download</a>
                     {% endif %}
-                    <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal"
-                        data-bs-target="#previewModal{{ loop.index }}">Full Preview</button>
+                    <!-- Change Full Preview button to Details and link to details page -->
+                    <a href="{{ url_for('photo_detail', photo_id=photo.id, photo_description=photo.description) }}"
+                        class="btn btn-primary float-end">Details</a>
                     {% if current_user.is_admin %}
                     <!-- edit photo button -->
                     <a href="{{ url_for('edit_photo', photo_id=photo.id) }}"
@@ -51,22 +54,21 @@
                 {% endif %}
             </div>
         </div>
-        {% endfor %}
-    </div>
-    {% for photo in photos %}
-    <div class="modal fade" id="previewModal{{ loop.index }}" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg d-flex">
-            <div class="modal-content">
-                <div class="modal-body text-center">
-                    <div class="zoom-img-container">
-                        <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}"
-                            class="modal-img" alt="{{ photo.filename }}">
+        <!-- Modal (unchanged) -->
+        <div class="modal fade" id="previewModal{{ loop.index }}" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg d-flex">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="zoom-img-container">
+                            <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}"
+                                class="modal-img" alt="{{ photo.filename }}">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endmacro %}
