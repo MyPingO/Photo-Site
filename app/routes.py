@@ -25,7 +25,7 @@ def gallery():
     shuffle(photos)
     return render_template('gallery.html', title='Gallery', photos=photos)
 
-@app.route('/gallery/<photo_id>-<photo_description>')
+@app.route('/gallery/<photo_id>_<photo_description>')
 def photo_detail(photo_id, photo_description):
     photo = Photo.query.filter_by(id=photo_id, description=photo_description).first()
     if photo is None:
