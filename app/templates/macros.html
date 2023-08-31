@@ -5,8 +5,8 @@
         <div class="col-lg-6 col-md-10 col-sm-12">
             <div class="card mb-4">
                 <!-- Wrap the image in a div with a click event to open the modal -->
-                <div class="card-img-container" data-bs-toggle="modal"
-                    data-bs-target="#previewModal{{ loop.index }}" style="cursor: pointer;">
+                <div class="card-img-container" data-bs-toggle="modal" data-bs-target="#previewModal{{ loop.index }}"
+                    style="cursor: pointer;">
                     <img src="{{ url_for('static', filename='images/thumbnails/' + photo.filename) }}"
                         class="card-img-top cursor-pointer" alt="{{ photo.filename }}">
                 </div>
@@ -23,7 +23,7 @@
                     <a href="{{ url_for('download', photo_id=photo.id) }}" class="btn btn-danger">Download</a>
                     {% endif %}
                     <!-- Change Full Preview button to Details and link to details page -->
-                    <a href="{{ url_for('photo_detail', photo_id=photo.id, photo_description=photo.description) }}"
+                    <a href="{{ url_for('photo_detail', photo_id=photo.id, photo_description=photo.description if photo.description else None) }}"
                         class="btn btn-primary float-end">Details</a>
                     {% if current_user.is_admin %}
                     <!-- edit photo button -->

@@ -25,9 +25,10 @@ def gallery():
     shuffle(photos)
     return render_template('gallery.html', title='Gallery', photos=photos)
 
+@app.route('/gallery/<photo_id>', defaults={'photo_description': None})
 @app.route('/gallery/<photo_id>_<photo_description>')
 def photo_detail(photo_id, photo_description):
-    photo = Photo.query.filter_by(id=photo_id, description=photo_description).first()
+    photo = Photo.query.get(photo_id)
     if photo is None:
         flash('Photo not found')
         return redirect(url_for('gallery'))
@@ -36,6 +37,14 @@ def photo_detail(photo_id, photo_description):
     with Image.open(original_image_path) as img:
         camera_make = img.getexif().get(271)
         camera_model = img.getexif().get(272)
+        exposure_time = getattr(img, '_getexif', lambda: None)().get(33434)
+        focal_length = getattr(img, '_getexif', lambda: None)().get(37386)
+        aperture = getattr(img, '_getexif', lambda: None)().get(37381)
+        iso = getattr(img, '_getexif', lambda: None)().get(34855)
+        date_taken = getattr(img, '_getexif', lambda: None)().get(36867)
+
+        #convert date taken to datetime object in 12 hour format
+        date_taken = datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S').strftime('%m/%d/%Y %I:%M %p') if date_taken else None
 
         exif_transpose = ImageOps.exif_transpose(img)
         dimesnions = exif_transpose.size
@@ -46,6 +55,11 @@ def photo_detail(photo_id, photo_description):
             "Mode": img.mode,
             "Size": f"{round(os.path.getsize(original_image_path) / 1024)} KB",
             "Camera": f"{camera_make} {camera_model}" if camera_make and camera_model else None,
+            "Exposure Time": f"{exposure_time.numerator}/{exposure_time.denominator} sec" if exposure_time else None,
+            "Focal Length": f"{focal_length}mm" if focal_length else None,
+            "Aperture": f"f/{aperture}" if aperture else None,
+            "ISO": iso,
+            "Date Taken": date_taken,
         }
     
     return render_template('photo_details.html', photo=photo, img_info=img_info, title=photo_description)
