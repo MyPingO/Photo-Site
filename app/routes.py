@@ -37,11 +37,18 @@ def photo_detail(photo_id, photo_description):
     with Image.open(original_image_path) as img:
         camera_make = img.getexif().get(271)
         camera_model = img.getexif().get(272)
-        exposure_time = getattr(img, '_getexif', lambda: None)().get(33434)
-        focal_length = getattr(img, '_getexif', lambda: None)().get(37386)
-        aperture = getattr(img, '_getexif', lambda: None)().get(37381)
-        iso = getattr(img, '_getexif', lambda: None)().get(34855)
-        date_taken = getattr(img, '_getexif', lambda: None)().get(36867)
+        exif_data = getattr(img, '_getexif', None)()
+        date_taken = None
+        exposure_time = None
+        focal_length = None
+        aperture = None
+        iso = None
+        if exif_data:
+            date_taken = exif_data.get(36867) or exif_data.get(36868)
+            exposure_time = exif_data.get(33434)
+            focal_length = exif_data.get(37386)
+            aperture = exif_data.get(37378)
+            iso = exif_data.get(34855)
 
         #convert date taken to datetime object in 12 hour format
         date_taken = datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S').strftime('%m/%d/%Y %I:%M %p') if date_taken else None
