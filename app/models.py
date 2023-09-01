@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     photos = db.relationship('Photo', backref='owner', lazy='dynamic')
     purchases = db.relationship('Purchase', back_populates='user', lazy='dynamic')
     collection_purchases = db.relationship('CollectionPurchase', back_populates='user', lazy='dynamic')
+    subscribed = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
@@ -56,4 +57,3 @@ class Purchase(UserMixin, db.Model):
         return f'<Purchase {self.id}>'
     def date_pretty(self):
         return self.date.strftime('%b %d, %Y %I:%M %p')
-

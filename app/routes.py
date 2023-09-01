@@ -5,7 +5,7 @@ from flask_mail import Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from .models import CollectionPurchase, Photo, User, Purchase
-from .forms import ContactForm, ForgotPasswordForm, PhotoUploadForm, PurchaseSearchForm, LoginForm, ResetPasswordForm, SignupForm, EditPhotoForm
+from .forms import ContactForm, ForgotPasswordForm, PhotoUploadForm, PurchaseSearchForm, LoginForm, ResetPasswordForm, SignupForm, EditPhotoForm, SubscriptionMessageForm
 from app import app, db, mail
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from math import sqrt
@@ -426,6 +426,7 @@ def signup():
         username = form.username.data
         email = form.email.data
         password = form.password.data
+        subscribe = form.subscribe.data
 
         account_validation = check_signup_data(username, email, password)
 
@@ -433,7 +434,7 @@ def signup():
             return redirect(url_for('signup'))
 
         hashed_password = generate_password_hash(password)
-        new_user = User(username=username, email=email, password=hashed_password)
+        new_user = User(username=username, email=email, password=hashed_password, subscribed=subscribe)
 
         db.session.add(new_user)
         db.session.commit()
@@ -534,6 +535,101 @@ def send_reset_email(email, token):
         </html>
     """
     mail.send(msg)
+
+@app.route('/send_subscription_message', methods=['GET', 'POST'])
+def send_subscription_message():
+    form = SubscriptionMessageForm()
+    latest_photos = Photo.query.order_by(Photo.id.desc()).limit(10).all()  # Replace with your logic to get the latest photos
+
+    if form.validate_on_submit():
+        title = form.message_title.data
+        body = form.message_body.data
+
+        # Send emails (Your existing logic)
+        send_update_email(title, body)
+
+        flash('Subscription message sent successfully.', 'success')
+        return redirect(url_for('admin'))
+
+    return render_template('subscribe_message.html', form=form, latest_photos=latest_photos, title='Send Subscription Message')
+
+def generate_unsubscribe_token(email):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt=os.environ.get('UnsubscribeSalt'))
+
+def send_update_email(title, body):
+    users = User.query.filter_by(subscribed=True).all()
+    for user in users:
+        msg = Message(title, sender=app.config['MAIL_USERNAME'], recipients=[user.email])
+        msg.subject = title
+
+        # Convert Markdown-style links to HTML links
+        body_html = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', body)
+        # Replace newline characters with <br> for HTML
+        body_html = body_html.replace('\n', '<br>')
+        msg.html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    .email {{
+                        font-family: Arial, sans-serif;
+                        margin: 20px;
+                        text-align: center;
+                    }}
+                    .content {{
+                        margin: auto;
+                        font-size: 20px;
+                    }}
+                    .footer {{
+                        margin-top: 20px;
+                        font-size: 16px;
+                    }}
+                    a {{
+                        color: #007bff;
+                        text-decoration: none;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="email">
+                    <div class="content">
+                        <p>{body_html}</p>
+                    </div>
+                    <div class="footer">
+                        <p>If you do not want to receive these emails, you can <a href="{url_for('unsubscribe', token=generate_unsubscribe_token(user.email), _external=True)}">unsubscribe</a>.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        """
+        mail.send(msg)
+
+@app.route('/unsubscribe/<token>')
+def unsubscribe(token):
+    unsubscribe_salt = os.environ.get('UnsubscribeSalt')
+    print(unsubscribe_salt)
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    
+    try:
+        email = serializer.loads(token, salt=unsubscribe_salt)
+    except SignatureExpired:
+        flash('The unsubscribe link has expired', 'warning')
+        return redirect(url_for('gallery'))
+    except:
+        flash('Something went wrong, please try again with another link', 'warning')
+        return redirect(url_for('gallery'))
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if user is None:
+        flash('Invalid unsubscribe link', 'warning')
+        return redirect(url_for('gallery'))
+
+    user.subscribed = False
+    db.session.commit()
+    flash('You have been unsubscribed from our mailing list', 'success')
+    return redirect(url_for('gallery'))
 
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required

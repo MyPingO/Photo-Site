@@ -4,6 +4,11 @@
 <div class="container my-4">
     <h1 class="text-center mb-5">Admin Dashboard</h1>
 
+    <div>
+        <!-- Send subscrive message button redirect -->
+        <a href="{{ url_for('send_subscription_message') }}" class="btn btn-primary mb-4">Send Subscription Message</a>
+    </div>
+
     <h2 class="mb-4">All Users</h2>
     <div class="row">
         {% for user in users %}

@@ -25,7 +25,7 @@ class SignupForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    remember = BooleanField('Remember Me')
+    subscribe = BooleanField('Get updates on new photos', default=True)
     submit = SubmitField('Sign Up')
 
 class EditPhotoForm(FlaskForm):
@@ -49,3 +49,8 @@ class ContactForm(FlaskForm):
     subject = StringField('Subject')
     message = TextAreaField('Message', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+class SubscriptionMessageForm(FlaskForm):
+    message_title = StringField('Message Title', validators=[DataRequired(), Length(min=5, max=100)], default='New Photos Available!')
+    message_body = TextAreaField('Message Content', validators=[DataRequired(), Length(min=10)])
+    submit = SubmitField('Send')
