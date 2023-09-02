@@ -24,8 +24,9 @@ a {
     margin-right: 5% !important;
 }
 
+/* /* Gallery Container */
 .galleryContainer {
-    margin: 1%;
+    margin: 2%;
 }
 
 .clickable-link {
@@ -75,19 +76,36 @@ a {
     object-fit: cover;
 }
 
-.btn-success {
-    background-color: #fd7e14 !important;
+
+/* Button Styling */
+.btn {
+    transition: background-color .1s ease;
     border: none !important;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
 }
 
 .btn-secondary {
     background-color: #007bff !important;
-    border: none !important;
+
+}
+
+.btn-secondary:hover {
+    background-color: #0069d9 !important;
 }
 
 .btn-danger {
-    background-color: #28a745 !important;
-    border: none !important;
+    background-color: #b938ec !important;
+}
+
+.btn-danger:hover {
+    background-color: #9c2fc7 !important;
 }
 
 .modal-dialog {
@@ -131,7 +149,6 @@ a {
     background: white;
     /* Ensure that the padding area is white */
 }
-
 
 @media (max-width: 499px) {
     body {
