@@ -1,5 +1,6 @@
 from datetime import datetime
-from flask import jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
+from xml.dom import minidom
+from flask import Response, jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
 from flask_login import login_required, current_user, login_user, logout_user
 from flask_mail import Message
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -12,7 +13,7 @@ from math import sqrt
 from random import shuffle, choice
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from stripe.error import SignatureVerificationError
-import re, os, stripe
+import re, os, stripe, xml.etree.ElementTree as ET
 
 collection_categories = ['Flowers & Plants', 'Animals', 'Birds', 'Bugs', 'Vehicles', 'Landscapes', 'Food', 'People', 'Architecture', 'Other']
 collection_price = 19.99
@@ -726,3 +727,40 @@ def about():
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
+
+@app.route('/google-merchant-feed.xml')
+def google_merchant_feed():
+    # Create the root element
+    rss = ET.Element('rss', {'version': '2.0', 'xmlns:g': 'http://base.google.com/ns/1.0'})
+    channel = ET.SubElement(rss, 'channel')
+
+    # Add basic channel info
+    ET.SubElement(channel, 'title').text = "Ping's Photos"
+    ET.SubElement(channel, 'link').text = 'http://www.pingsphotos.com'
+    ET.SubElement(channel, 'description').text = 'Your photo marketplace'
+
+    products = Photo.query.all()  # Replace with your own query logic to get products
+
+    for product in products:
+        item = ET.SubElement(channel, 'item')
+        ET.SubElement(item, 'g:id').text = str(product.id)
+        ET.SubElement(item, 'g:title').text = product.description
+        ET.SubElement(item, 'g:description').text = product.description
+        ET.SubElement(item, 'g:link').text = f'http://www.pingsphotos.com/gallery/{product.id}'
+        ET.SubElement(item, 'g:price').text = f'{product.price} USD'
+        ET.SubElement(item, 'g:availability').text = 'in stock'
+        ET.SubElement(item, 'g:condition').text = 'new'
+    
+    # Prettify the XML
+    rough_string = ET.tostring(rss, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    pretty_xml_str = reparsed.toprettyxml(indent="\t")
+
+    # Save the XML content to a file
+    xml_file_path = os.path.join(app.root_path, 'static', 'google-merchant-feed.xml')
+    with open(xml_file_path, 'w') as f:
+        f.write(pretty_xml_str)
+
+    # Serve the XML file
+    return send_from_directory('static', secure_filename('google-merchant-feed.xml'),
+                               as_attachment=True, mimetype='application/xml')
