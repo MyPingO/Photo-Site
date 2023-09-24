@@ -5,26 +5,37 @@
 <div class="container my-4" style="max-width: 750px;">
     <div class="card">
         <!-- Card image -->
-        <div class="card-img-container">
+        <div class="card-img-container" data-bs-toggle="modal" data-bs-target="#previewModal" style="cursor: pointer;">
             <img src="{{ url_for('static', filename='images/previews/' + photo.filename) }}" class="card-img-top"
                 alt="{{ photo.filename }}">
+            <div class="overlay">
+                <i class="bi bi-search"></i>
+            </div>
         </div>
 
         <!-- Card body -->
         <div class="card-body bg-light">
             <div class="container">
                 <div class="row">
-                    <!-- Title and Description -->
-                    <span class="lead fs-2 text-center">{{ photo.description }}</span>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <!-- Title and Description -->
+                        <span id="description" class="lead fs-2 text-center flex-grow-1">{{ photo.description }}</span>
+                        <!-- view counter with eye icon position absolute stay right side -->
+                        <span id="viewCounter">
+                            <i class="bi bi-eye-fill"></i> {{ photo.views }}
+                        </span>
+                    </div>
 
                     <div class="buttons mt-3">
                         <!-- Price and Buy Button -->
-                        <button data-id="{{ photo.id }}" class="btn btn-success buy-photo-btn">Buy Now ${{
-                            photo.price }}</button>
+                        <button data-id="{{ photo.id }}" class="btn btn-success buy-photo-btn">
+                            <i class="bi bi-cart4"></i>
+                            ${{photo.price }}
+                        </button>
 
                         <!-- Full Preview Button -->
                         <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal"
-                            data-bs-target="#previewModal">Full Preview</button>
+                            data-bs-target="#previewModal">Preview</button>
                     </div>
                 </div>
 
@@ -76,6 +87,12 @@
                 }
             }
         });
+
+        const descriptionSpan = document.getElementById('description');
+        const viewCounterSpan = document.getElementById('viewCounter');
+
+        const viewSpanWidth = viewCounterSpan.offsetWidth;
+        descriptionSpan.style.marginLeft = viewSpanWidth + 'px';
     });
 
     function purchasePhoto(photoId) {

@@ -4,11 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="keywords" content="photography, photos, pictures, images, gallery, collections, buy, sell, download, ping, pings photos, ping's photos, beautiful pictures, stock photos, stock pictures, photo collections, purchase photos, purchase pictures, nature photos, animal photos, bird photos, {{ title }}">
+  <meta name="keywords"
+    content="photography, photos, pictures, images, gallery, collections, buy, sell, download, ping, pings photos, ping's photos, beautiful pictures, stock photos, stock pictures, photo collections, purchase photos, purchase pictures, nature photos, animal photos, bird photos, {{ title }}">
   <meta name="description" content="Ping's Photos is a website where you can browse and purchase beautiful photos.">
   <meta name="author" content="Ping's Photos">
   <meta property="og:title" content="Ping's Photos">
-  <meta property="og:description" content="Ping's Photos is a website where you can browse and purchase beautiful photos.">
+  <meta property="og:description"
+    content="Ping's Photos is a website where you can browse and purchase beautiful photos.">
   <meta property="og:url" content="{{ url_for('gallery') }}">
   <meta property="og:type" content="website">
   <meta property="og:image" content="{{ url_for('static', filename='favicon.png') }}">
@@ -21,7 +23,7 @@
     integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
     crossorigin="anonymous"></script>
@@ -109,6 +111,21 @@
     crossorigin="anonymous"></script>
 
   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const cardImgContainers = document.querySelectorAll('.card-img-container');
+      cardImgContainers.forEach(container => {
+        container.addEventListener('mouseover', function () {
+          const overlay = this.querySelector('.overlay');
+          overlay.style.opacity = "1";
+          overlay.style.background = "rgba(0, 0, 0, 0.5)";
+        });
+        container.addEventListener('mouseout', function () {
+          const overlay = this.querySelector('.overlay');
+          overlay.style.opacity = "0";
+          overlay.style.background = "rgba(0, 0, 0, 0)";
+        });
+      });
+    });
     document.addEventListener('contextmenu', function (e) {
       if (e.target.tagName === 'IMG') {
         e.preventDefault();

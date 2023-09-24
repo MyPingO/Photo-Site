@@ -26,6 +26,7 @@ class Photo(UserMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     price = db.Column(db.Float, default=1.99)
     purchases = db.relationship('Purchase', back_populates='photo', lazy='dynamic')
+    views = db.Column(db.Integer, default=0)
 
     width = db.Column(db.Integer)
     height = db.Column(db.Integer)

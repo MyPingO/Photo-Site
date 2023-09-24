@@ -1,6 +1,6 @@
 from datetime import datetime
 from xml.dom import minidom
-from flask import Response, jsonify, render_template, flash, send_from_directory, url_for, redirect, request, abort
+from flask import jsonify, render_template, flash, send_from_directory, url_for, redirect, request
 from flask_login import login_required, current_user, login_user, logout_user
 from flask_mail import Message
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -69,6 +69,9 @@ def photo_detail(photo_id, photo_description):
             "ISO": iso,
             "Date Taken": date_taken,
         }
+    
+    photo.views += 1
+    db.session.commit()
     
     return render_template('photo_details.html', photo=photo, img_info=img_info, title=photo_description)
 

@@ -83,21 +83,4 @@
         {% endfor %}
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const cardImgContainers = document.querySelectorAll('.card-img-container');
-        cardImgContainers.forEach(container => {
-            container.addEventListener('mouseover', function() {
-                const overlay = this.querySelector('.overlay');
-                overlay.style.opacity = "1";
-                overlay.style.background = "rgba(0, 0, 0, 0.5)";
-            });
-            container.addEventListener('mouseout', function() {
-                const overlay = this.querySelector('.overlay');
-                overlay.style.opacity = "0";
-                overlay.style.background = "rgba(0, 0, 0, 0)";
-            });
-        });
-    });
-</script>
 {% endmacro %}
