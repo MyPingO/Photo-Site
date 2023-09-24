@@ -25,56 +25,66 @@
                             {{ form.confirm_password.label }} {{ form.confirm_password(class="form-control") }}
                             <!-- Error message for mismatched passwords -->
                             {% if form.confirm_password.errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    {% for error in form.confirm_password.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.confirm_password.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
                             {% endif %}
                         </div>
-                        <div class="mb-3">
-                            {{ form.subscribe.label(style="cursor: pointer;") }} {{ form.subscribe(class="form-check-input mx-2 my-2", style="cursor: pointer;") }}
+                        <div class="mb-1">
+                            {{ form.subscribe.label(style="cursor: pointer;") }} {{
+                            form.subscribe(class="form-check-input mx-2 my-2", style="cursor: pointer;") }}
+                        </div>
+                        <div class="lead mb-3">
+                            {{ form.remember(class="form-check-input") }} {{ form.remember.label }}
                         </div>
                         <div class="d-flex align-items-end justify-content-between">
                             <button type="submit" class="btn btn-primary">Sign Up</button>
-                            <small><a href="{{ url_for('login') }}" class="text-decoration-none">Already have an account?</a></small>
+                            <small><a href="{{ url_for('login') }}" class="text-decoration-none">Already have an
+                                    account?</a></small>
                         </div>
                     </form>
                     <div class="mt-4" id="passwordRules">
                         <h5 class="font-weight-bold">Password must contain:</h5>
                         <ul class="">
-                            <li class="list-group-item mb-1 lead"><small><span id="lengthCheck"></span> At least 8 characters</small></li>
-                            <li class="list-group-item mb-1 lead"><small><span id="uppercaseCheck"></span> One uppercase letter</small></li>
-                            <li class="list-group-item mb-1 lead"><small><span id="lowercaseCheck"></span> One lowercase letter</small></li>
-                            <li class="list-group-item mb-1 lead"><small><span id="numberCheck"></span> One number</small></li>
-                            <li class="list-group-item mb-1 lead"><small><span id="specialCharCheck"></span> One special character</small></li>
+                            <li class="list-group-item mb-1 lead"><small><span id="lengthCheck"></span> At least 8
+                                    characters</small></li>
+                            <li class="list-group-item mb-1 lead"><small><span id="uppercaseCheck"></span> One uppercase
+                                    letter</small></li>
+                            <li class="list-group-item mb-1 lead"><small><span id="lowercaseCheck"></span> One lowercase
+                                    letter</small></li>
+                            <li class="list-group-item mb-1 lead"><small><span id="numberCheck"></span> One
+                                    number</small></li>
+                            <li class="list-group-item mb-1 lead"><small><span id="specialCharCheck"></span> One special
+                                    character</small></li>
                         </ul>
-                    </div>                                   
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <script>
-    document.getElementById('password').addEventListener('input', function() {
+    document.getElementById('password').addEventListener('input', function () {
         var password = this.value;
-    
+
         // Check for length
         toggleCheck('lengthCheck', password.length >= 8);
-    
+
         // Check for uppercase letter
         toggleCheck('uppercaseCheck', /[A-Z]/.test(password));
-    
+
         // Check for lowercase letter
         toggleCheck('lowercaseCheck', /[a-z]/.test(password));
-    
+
         // Check for number
         toggleCheck('numberCheck', /\d/.test(password));
-    
+
         // Check for special character
         toggleCheck('specialCharCheck', /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password));
     });
-    
+
     function toggleCheck(checkmarkId, condition) {
         var checkmark = document.getElementById(checkmarkId);
         if (condition) {
