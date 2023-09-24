@@ -26,6 +26,7 @@ class SignupForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     subscribe = BooleanField('Get updates on new photos', default=True)
+    remember = BooleanField('Remember Me')
     submit = SubmitField('Sign Up')
 
 class EditPhotoForm(FlaskForm):
